@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'models/ParentProfilemoadels.dart';
+import '../Screens/StartupDashBord/Models/ParentMoadel.dart';
 import 'models/StudentProfilemodels.dart';
 import 'models/TeacherProfilemodels.dart';
 
@@ -10,26 +10,27 @@ class UserProfileProvider extends ChangeNotifier {
   String? roal;
   StudentProfileModel? profileData;
   TeacherProfileModel? teacherdata;
-  ParentProfileModel? parentprofile;
+  ParentProfileDataModel? parentprofile;
 
   setProfileData(data) {
     profileData = StudentProfileModel.fromJson(data);
     dbid = profileData!.sId;
-    roal = profileData!.role;
+    roal = 'student';
     userid = profileData!.userId;
     notifyListeners();
   }
 
   setTeacherData(data) {
     teacherdata = TeacherProfileModel.fromJson(data);
-    dbid = teacherdata!.sId;
+    print(data);
+    dbid = teacherdata!.profile!.useridnamePassword!.useridName;
     userid = teacherdata!.profile!.useridnamePassword!.useridName;
-    roal = teacherdata!.role;
+    roal = "teacher";
     notifyListeners();
   }
 
   setParentData(data) {
-    parentprofile = ParentProfileModel.fromJson(data);
+    parentprofile = ParentProfileDataModel.fromJson(data);
     dbid = parentprofile!.parentUseridname;
     userid = parentprofile!.parentUseridname;
     roal = 'parent';

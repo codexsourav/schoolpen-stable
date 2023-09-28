@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:schoolpenintern/Screens/Profile/ViewUserProfile.dart';
-import 'package:schoolpenintern/data/Network/config.dart';
-
+import 'package:schoolpenintern/Screens/SearchUser/SearchUsers.dart';
 import '../../../Theme/Colors/appcolors.dart';
 
 AppBar chatAppbar(context, {image, name, title, id, typename, onMenuselect}) {
@@ -27,7 +26,7 @@ AppBar chatAppbar(context, {image, name, title, id, typename, onMenuselect}) {
     title: ListTile(
       splashColor: Colors.black12,
       onTap: () {
-        Get.to(ViewUserProfile(userid: id, role: typename));
+        Get.to(SearchUserProfile(userid: id));
       },
       dense: true,
       contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
@@ -40,8 +39,7 @@ AppBar chatAppbar(context, {image, name, title, id, typename, onMenuselect}) {
             borderRadius: BorderRadius.circular(50),
           ),
           child: Image.network(
-            Config.hostUrl + "/static/" + image ??
-                "https://s3.amazonaws.com/www-inside-design/uploads/2019/03/featureuserpersona.jpg",
+            image,
             height: 40,
             width: 40,
             fit: BoxFit.cover,
@@ -78,8 +76,8 @@ AppBar chatAppbar(context, {image, name, title, id, typename, onMenuselect}) {
           PopupMenuItem(value: "profile", child: Text("View Profile")),
           PopupMenuItem(value: "block", child: Text("Block User")),
           PopupMenuItem(value: "unblock", child: Text("Unblock User")),
-          PopupMenuItem(child: Text("Mute Chat")),
-          PopupMenuItem(child: Text("Clear Chat")),
+          // PopupMenuItem(child: Text("Mute Chat")),
+          // PopupMenuItem(child: Text("Clear Chat")),
         ],
       ),
     ],

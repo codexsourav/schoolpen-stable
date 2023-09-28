@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-
 import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
-import 'package:schoolpenintern/Screens/Profile/ViewProfile/view_parent_profile.dart';
-import 'package:schoolpenintern/Screens/Profile/ViewProfile/view_student_profile.dart';
-import 'package:schoolpenintern/Screens/Profile/ViewProfile/view_teacher_profile.dart';
-import 'package:schoolpenintern/data/Network/config.dart';
+import 'package:schoolpenintern/Screens/Profile/ViewUserProfile.dart';
 
 import '../../../Theme/Colors/appcolors.dart';
+import '../../../utiles/LoadImage.dart';
 import '../ChatRequest/RequestPage.dart';
 
-AppBar chatHomeAppbar(context, role, image, uid) {
+AppBar chatHomeAppbar(context, {role, image, uid}) {
+  print("thisuis if=======================" + uid);
   return AppBar(
     centerTitle: true,
     leading: IconButton(
@@ -21,7 +19,11 @@ AppBar chatHomeAppbar(context, role, image, uid) {
       },
       icon: Icon(
         Icons.arrow_back_ios_rounded,
-        color: role == "student" ? AppColors.purple : AppColors.pinkDarkcolor,
+        color: role == "student"
+            ? AppColors.purple
+            : role == "teacher"
+                ? AppColors.pinkDarkcolor
+                : const Color.fromARGB(255, 117, 185, 119),
       ),
     ),
     title: Text(
@@ -36,19 +38,35 @@ AppBar chatHomeAppbar(context, role, image, uid) {
           ));
         },
         icon: const Icon(Icons.notifications),
-        color: role == "student" ? AppColors.purple : AppColors.pinkDarkcolor,
+        color: role == "student"
+            ? AppColors.purple
+            : role == "teacher"
+                ? AppColors.pinkDarkcolor
+                : const Color.fromARGB(255, 117, 185, 119),
       ),
       const SizedBox(width: 20),
       GestureDetector(
         onTap: () {
-          var role =
-              Provider.of<UserProfileProvider>(context, listen: false).roal;
           if (role == 'student') {
-            Get.to(ViewStudentProfile());
+            Get.to(ViewUserProfile(
+              role: 'student',
+              userid: uid,
+            ));
           } else if (role == 'teacher') {
-            Get.to(ViewTeacherProfile());
+            Get.to(
+              ViewUserProfile(
+                role: 'teacher',
+                userid: uid,
+              ),
+            );
           } else if (role == 'parent') {
-            Get.to(ViewParentProfile());
+            print(role);
+            Get.to(
+              ViewUserProfile(
+                role: 'parent',
+                userid: uid,
+              ),
+            );
           } else {
             Fluttertoast.showToast(msg: "I Dont Know Who Are You");
           }
@@ -58,7 +76,7 @@ AppBar chatHomeAppbar(context, role, image, uid) {
           width: 35,
           child: CircleAvatar(
             backgroundImage: NetworkImage(
-              "${Config.hostUrl}/static/" + image,
+              loadImage(image, role),
             ),
           ),
         ),

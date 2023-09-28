@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
 
 class Search extends StatelessWidget {
+  final TextInputType keybordtype;
   const Search(
       {super.key,
       required this.controller,
       required this.backGroundLightColor,
       required this.searchIconColor,
       this.onEditingComplete,
+      this.keybordtype = TextInputType.name,
       required this.onTap});
   final TextEditingController controller;
+
   final Color backGroundLightColor;
   final Color searchIconColor;
   final Function onTap;
+
   final Function()? onEditingComplete;
 
   @override
@@ -43,6 +47,7 @@ class Search extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 onEditingComplete: onEditingComplete,
+                keyboardType: keybordtype,
                 decoration: InputDecoration(
                   hintText: 'Search',
                   hintStyle: TextStyle(color: Colors.grey, fontSize: w * 0.05),

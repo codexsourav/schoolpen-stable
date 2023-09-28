@@ -1,25 +1,32 @@
 import 'package:flutter/material.dart';
 
 class ProfileCard extends StatelessWidget {
-  const ProfileCard(
-      {super.key,
-      required this.backGroundColor,
-      required this.userName,
-      required this.isStudent,
-      required this.std,
-      required this.buttonColor,
-      required this.onCall,
-      required this.onMessage,
-      required this.image});
+  const ProfileCard({
+    super.key,
+    required this.backGroundColor,
+    required this.userName,
+    required this.isStudent,
+    required this.std,
+    required this.buttonColor,
+    required this.onCall,
+    this.onMessage,
+    required this.image,
+    this.edit = false,
+    this.borderRedius = 20,
+    this.borderwidth = 0,
+  });
   final Color backGroundColor;
   final Color buttonColor;
   final String userName;
   final bool isStudent;
   final String std;
+  final double borderRedius;
+  final double borderwidth;
 
-  final Function onCall;
-  final Function() onMessage;
+  final Function()? onCall;
+  final Function()? onMessage;
   final String image;
+  final bool edit;
 
   @override
   Widget build(BuildContext context) {
@@ -45,10 +52,14 @@ class ProfileCard extends StatelessWidget {
                     height: (h < 700) ? h * 0.25 : h * 0.2,
                     width: w * 0.4,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                        color: Colors.grey,
-                        image: DecorationImage(
-                            image: NetworkImage(image), fit: BoxFit.cover)),
+                      borderRadius: BorderRadius.circular(borderRedius),
+                      color: Colors.grey,
+                      border: borderwidth == 0
+                          ? null
+                          : Border.all(width: borderwidth, color: buttonColor),
+                      image: DecorationImage(
+                          image: NetworkImage(image), fit: BoxFit.cover),
+                    ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -78,7 +89,7 @@ class ProfileCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             GestureDetector(
-                              onTap: onCall(),
+                              onTap: onCall,
                               child: Container(
                                 height: h * 0.1,
                                 width: w * 0.1,
@@ -114,17 +125,19 @@ class ProfileCard extends StatelessWidget {
             ],
           ),
         ),
-        Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-            padding: const EdgeInsets.only(top: 10, right: 20),
-            child: Icon(
-              Icons.more_horiz_rounded,
-              color: Colors.grey,
-              size: 30,
-            ),
-          ),
-        ),
+        edit
+            ? Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: EdgeInsets.only(top: 10, right: 20),
+                  child: Icon(
+                    Icons.edit_note,
+                    color: Colors.grey,
+                    size: 30,
+                  ),
+                ),
+              )
+            : SizedBox(),
       ],
     );
   }

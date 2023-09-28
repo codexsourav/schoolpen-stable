@@ -8,13 +8,13 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:schoolpenintern/Screens/Profile/ViewProfile/view_parent_profile.dart';
 import 'package:schoolpenintern/Screens/Student/home_screen.dart';
-import 'package:schoolpenintern/Screens/Teacher/home.dart';
 import 'package:schoolpenintern/data/Network/api_network.dart';
 
 import '../Providers/UserProfileProvider.dart';
 import '../Routes/routes_names.dart';
 import '../bloc/main_bloc/main_bloc.dart';
 import 'StartupDashBord/views/admin_user.dart';
+import 'Teacher/home.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -66,7 +66,7 @@ class _SplashScreenState extends State<SplashScreen> {
         } else if (state is TeacherScreenState) {
           try {
             var res = await ApiNetwork.sendGetRequest(
-                'get_teacher/' + state.username);
+                'get_teacher_profile/' + state.username);
             Provider.of<UserProfileProvider>(context, listen: false)
                 .setTeacherData(res);
             Get.offAll(const TeacherHomePage());

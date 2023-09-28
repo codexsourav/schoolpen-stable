@@ -5,10 +5,11 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
-import 'package:schoolpenintern/Screens/Chat/ChatHome/ChatHomeScreen.dart';
-import 'package:schoolpenintern/Screens/Profile/ViewProfile/view_student_profile.dart';
-import 'package:schoolpenintern/Screens/Teacher/custom/strings.dart';
 
+import 'package:schoolpenintern/Screens/Profile/ViewProfile/view_student_profile.dart';
+
+import '../../Profile/ViewUserProfile.dart';
+import '../../constants/strings.dart';
 import '../constants/ConstantColors.dart';
 
 class CommonTextfield extends StatelessWidget {
@@ -25,7 +26,7 @@ class CommonTextfield extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-          color: Color.fromARGB(255, 241, 234, 250),
+          color: const Color.fromARGB(255, 241, 234, 250),
           borderRadius: BorderRadius.circular(32)),
       width: MediaQuery.of(context).size.width * 0.9,
       height: 65,
@@ -35,7 +36,7 @@ class CommonTextfield extends StatelessWidget {
         decoration: InputDecoration(
             hintText: Text,
             hintStyle: GoogleFonts.lato(),
-            border: OutlineInputBorder(borderSide: BorderSide.none)),
+            border: const OutlineInputBorder(borderSide: BorderSide.none)),
       ),
     );
   }
@@ -43,11 +44,13 @@ class CommonTextfield extends StatelessWidget {
 
 class CustomButton extends StatelessWidget {
   final String text;
+  final bool loading;
   final VoidCallback callback;
   const CustomButton({
     super.key,
     required this.callback,
     required this.text,
+    this.loading = false,
   });
 
   @override
@@ -65,10 +68,10 @@ class CustomButton extends StatelessWidget {
               borderRadius: BorderRadius.circular(30.0),
             ))),
         onPressed: callback,
-        child: Text(
-          text,
-          style: GoogleFonts.lato(fontSize: 18, color: Colors.white),
-        ),
+        child: loading
+            ? const CircularProgressIndicator(color: Colors.white)
+            : Text(text,
+                style: GoogleFonts.lato(fontSize: 18, color: Colors.white)),
       ),
     );
   }
@@ -136,7 +139,7 @@ class MultiTextInputField extends StatelessWidget {
           child: Text(
             title,
             textAlign: TextAlign.left,
-            style: TextStyle(fontWeight: FontWeight.w500),
+            style: const TextStyle(fontWeight: FontWeight.w500),
           ),
         ),
         Row(
@@ -157,7 +160,7 @@ class MultiTextInputField extends StatelessWidget {
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         hintText: hinttext1,
-                        hintStyle: TextStyle(color: Colors.grey)),
+                        hintStyle: const TextStyle(color: Colors.grey)),
                   ),
                 ),
               ),
@@ -178,7 +181,7 @@ class MultiTextInputField extends StatelessWidget {
                         border: InputBorder.none,
                         enabledBorder: InputBorder.none,
                         hintText: hinttext2,
-                        hintStyle: TextStyle(color: Colors.grey)),
+                        hintStyle: const TextStyle(color: Colors.grey)),
                   ),
                 ))
           ],
@@ -235,7 +238,14 @@ class HeaderWidget1 extends StatelessWidget {
                         },
                         child: GestureDetector(
                           onTap: () {
-                            Get.to(() => ViewStudentProfile());
+                            Get.to(() => ViewUserProfile(
+                                  role: 'student',
+                                  userid: Provider.of<UserProfileProvider>(
+                                          context,
+                                          listen: false)
+                                      .userid
+                                      .toString(),
+                                ));
                           },
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(50),
@@ -249,13 +259,13 @@ class HeaderWidget1 extends StatelessWidget {
                           ),
                         ),
                       ),
-                      SizedBox(
+                      const SizedBox(
                         width: 12,
                       ),
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             "Welcome back",
                             style: TextStyle(
                                 color: Colors.white,
@@ -264,7 +274,7 @@ class HeaderWidget1 extends StatelessWidget {
                           ),
                           Consumer<UserProfileProvider>(
                               builder: (context, value, child) {
-                            return Text(
+                            return const Text(
                               "Rishabh",
                               // value.profileData!.username.toString() ?? "",
                               style: TextStyle(
@@ -277,7 +287,7 @@ class HeaderWidget1 extends StatelessWidget {
                       )
                     ],
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 16,
                   ),
                   SizedBox(

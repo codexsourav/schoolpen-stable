@@ -16,6 +16,7 @@ import 'package:schoolpenintern/data/model/StudentProfileModel.dart';
 import '../../../Theme/Colors/appcolors.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
+import '../../../utiles/LoadImage.dart';
 import '../../../utiles/TimeToDays.dart';
 
 // ignore: must_be_immutable
@@ -46,7 +47,7 @@ class _ChatUserListBoxState extends State<ChatUserListBox> {
         Provider.of<UserProfileProvider>(context, listen: false);
 
     var url = Uri.parse(
-        'http://192.168.33.88:7000/last_message/${userdata.userid}/${id}');
+        '${Config.chatserverUrl}/last_message/${userdata.userid}/${id}');
     print(url);
     var req = http.MultipartRequest('GET', url);
     var res = await req.send();
@@ -81,14 +82,16 @@ class _ChatUserListBoxState extends State<ChatUserListBox> {
     } else if (widget.chatuserId!['role'] == 'teacher') {
       TeacherProfileModel userData =
           TeacherProfileModel.fromJson(widget.chatuserId);
+      print("==========TEACHER==========");
+      print(widget.chatuserId);
       image = userData.userImage!;
       userid = userData.profile!.useridnamePassword!.useridName!;
-      name = userData.username!;
+      name = userData.profile!.useridnamePassword!.useridName!;
       roal = "teacher";
       getLastMessage(userid);
     } else if (widget.chatuserId!['role'] == 'parent') {
-      ParentProfileModel userData =
-          ParentProfileModel.fromJson(widget.chatuserId);
+      ParentProfileDataModel userData =
+          ParentProfileDataModel.fromJson(widget.chatuserId);
       image = userData.parentImage!;
       userid = userData.parentUseridname!;
       name = userData.parentName!;
@@ -141,7 +144,7 @@ class _ChatUserListBoxState extends State<ChatUserListBox> {
             borderRadius: BorderRadius.circular(50),
           ),
           child: Image.network(
-            "${Config.hostUrl}/static/${image}",
+            loadImage(image, roal),
             height: 50,
             width: 50,
             fit: BoxFit.cover,

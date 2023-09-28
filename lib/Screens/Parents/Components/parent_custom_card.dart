@@ -12,14 +12,14 @@ class CustomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 15.0, right: 15, top: 5, bottom: 5),
+      padding: const EdgeInsets.only(left: 10.0, right: 8, top: 5, bottom: 5),
       child: Container(
-        width: 168,
+        width: 160,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: double.infinity,
+             // width: double.infinity,
               height: 88,
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -27,7 +27,7 @@ class CustomCard extends StatelessWidget {
                   Container(
                     margin: EdgeInsets.only(right: 8),
                     padding: EdgeInsets.fromLTRB(23 ,24,24,24),
-                    width: 160,
+                    width: 150,
                     // height: double.infinity,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(24),

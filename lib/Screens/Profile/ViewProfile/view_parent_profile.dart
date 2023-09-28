@@ -6,7 +6,8 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
-import 'package:schoolpenintern/Screens/Chat/ChatHome/ChatHomeScreen.dart';
+import 'package:schoolpenintern/Screens/Chat/ChatHome/NewChatHome.dart';
+
 import 'package:schoolpenintern/Screens/Profile/ViewProfile/Constents.dart';
 import 'package:schoolpenintern/data/Network/config.dart';
 
@@ -21,7 +22,7 @@ import '../../../Components/Vishwajeet_widgets/profile_card.dart';
 
 class ViewParentProfile extends StatelessWidget {
   ViewParentProfile({super.key});
-  String roal = "Student";
+  String roal = "parent";
   final int tabindex = 0;
 
   @override
@@ -39,7 +40,7 @@ class ViewParentProfile extends StatelessWidget {
                       // Viswajieet Eiget Start
                       // Search(
                       //   controller: _controller,
-                      //   backGroundLightColor: viewProfileTabs[roal]['bgcolor'],
+                      //   backGroundLightColor: const Color(0xFFEEFCF3),
                       //   searchIconColor: viewProfileTabs[roal]['darkcolor'],
                       //   onTap: searchStudent,
                       //   onEditingComplete: searchStudent,
@@ -49,7 +50,7 @@ class ViewParentProfile extends StatelessWidget {
                           const SizedBox(height: 20),
                           // Profile Card Here ==============
                           ProfileCard(
-                            backGroundColor: viewProfileTabs[roal]['bgcolor'],
+                            backGroundColor: const Color(0xFFEEFCF3),
                             userName: userdata.parentprofile!.parentUseridname
                                 .toString(),
                             isStudent: false,
@@ -57,7 +58,7 @@ class ViewParentProfile extends StatelessWidget {
                             buttonColor: viewProfileTabs[roal]['darkcolor'],
                             onCall: () {},
                             onMessage: () {
-                              Get.to(() => ChatHomeScreen(
+                              Get.to(() => NewChatHome(
                                     role: "parent",
                                     myid: userdata.dbid.toString(),
                                     myuserid: userdata
@@ -103,7 +104,7 @@ class ViewParentProfile extends StatelessWidget {
                               // const SizedBox(height: 20),
                               // Status Card Here ==============
                               // StatusCard(
-                              //     bgcolor: viewProfileTabs[roal]['bgcolor'],
+                              //     bgcolor: const Color(0xFFEEFCF3),
                               //     headline: userdata.parentprofile!.personalInfo.s
                               //         .toString(),
                               //     description: userdata
@@ -112,7 +113,7 @@ class ViewParentProfile extends StatelessWidget {
                               const SizedBox(height: 20),
                               // About Card Here ==============
                               AboutCard(
-                                bgcolor: viewProfileTabs[roal]['bgcolor'],
+                                bgcolor: const Color(0xFFEEFCF3),
                                 description: userdata
                                     .parentprofile!.parentDescription
                                     .toString(),
@@ -128,12 +129,12 @@ class ViewParentProfile extends StatelessWidget {
                             onEditClick: () {},
                             userIdText: userdata.parentprofile!.parentUseridname
                                 .toString(),
-                            backgroundColor: viewProfileTabs[roal]['bgcolor'],
+                            backgroundColor: const Color(0xFFEEFCF3),
                           ),
                           const SizedBox(height: 20),
                           // User Contact Card Here ==============
                           // UserConatctBox(
-                          //   backgroundColor: viewProfileTabs[roal]['bgcolor'],
+                          //   backgroundColor: const Color(0xFFEEFCF3),
                           //   onEditClick: () {},
                           //   emailText: userdata.parentprofile!.!
                           //       .contact!.parentEmail
@@ -149,7 +150,7 @@ class ViewParentProfile extends StatelessWidget {
                           UserParentsBox(
                             title: "Kids Detail",
                             data: [],
-                            bgcolor: viewProfileTabs[roal]['bgcolor'],
+                            bgcolor: const Color(0xFFEEFCF3),
                             darkcolor: viewProfileTabs[roal]['darkcolor'],
                           ),
                           const SizedBox(height: 20),

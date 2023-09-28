@@ -20,23 +20,21 @@ class AddUsersProvider extends ChangeNotifier {
   String? email;
   String? area;
   String? city;
-   String? pincode;
+  String? pincode;
   String? state;
   // Secend Screen
   String? schoolKey;
   String? userClass;
   String? status;
   String? statusdesc;
-
   String? about;
   // fot teacher
   String? teachingsubjects;
-
   // Therd Screen
   String? userid;
   String? pass;
   String? cpass;
-
+  String? region;
   // Set This Data
   setData({
     File? gteprofileImage,
@@ -47,9 +45,9 @@ class AddUsersProvider extends ChangeNotifier {
     String? gteemail,
     String? getaddress,
     String? getarea,
-  String? getcity,
-   String? getpincode,
-  String? getstate,
+    String? getcity,
+    String? getpincode,
+    String? getstate,
     /////////////////////////////
     String? getschoolKey,
     String? getuserClass,
@@ -61,6 +59,7 @@ class AddUsersProvider extends ChangeNotifier {
     String? getuserid,
     String? getpassword,
     String? repassword,
+    String? setregion,
   }) {
     profileImage = gteprofileImage ?? profileImage;
     fullname = gtefullname ?? fullname;
@@ -69,20 +68,24 @@ class AddUsersProvider extends ChangeNotifier {
     phone = gtephone ?? phone;
     email = gteemail ?? email;
     // address = getaddress ?? address;
+    state = getstate ?? state;
+    city = getcity ?? city;
+    pincode = getpincode ?? pincode;
+    area = getarea ?? area;
     ///////////////////////////////////
     schoolKey = getschoolKey ?? schoolKey;
     userClass = getuserClass ?? userClass;
     status = getstatus ?? status;
     statusdesc = getstatusdesc ?? statusdesc;
-
     about = getabout ?? about;
     teachingsubjects = geteachingsubjects ?? teachingsubjects;
     ////////////////////////////
     userid = getuserid ?? userid;
     pass = getpassword ?? pass;
     cpass = repassword ?? cpass;
-
+    region = setregion ?? region;
     notifyListeners();
+    print("=====================> ${about}");
   }
 
   void resetFormState() {
@@ -130,10 +133,11 @@ class AddUsersProvider extends ChangeNotifier {
         "about": about,
         "phone": phone,
         "email": email,
-        "street":area,
-        "city":city,
-        "state":state,
-        "pincode":pincode,
+        "street": area,
+        "city": city,
+        "state": state,
+        "region": region,
+        "pincode": pincode,
         'user_image': await MultipartFile.fromFile(profileImage!.path,
             filename: fileName),
       });
@@ -212,17 +216,17 @@ class AddUsersProvider extends ChangeNotifier {
         "userid_name": userid,
         "schoolkey": schoolKey,
         "dob": dobdate,
+        "region": region,
         "languages": teachingsubjects,
         "user_designation": status,
         "user_description": statusdesc,
         "user_about": about,
-         "street":area,
-        "city":city,
-        "state":state,
-        "postal_code":pincode,
+        "street": area,
+        "city": city,
+        "state": state,
+        "postal_code": pincode,
         "phone": phone,
         "email": email,
-        
         'user_image': await MultipartFile.fromFile(profileImage!.path,
             filename: fileName),
       });
@@ -232,15 +236,14 @@ class AddUsersProvider extends ChangeNotifier {
 
       loading = false;
       notifyListeners();
-      print(response.data);
+
       if (response.statusCode == 200) {
         showSnackBar(
           context,
           message: "Profile is Successfully Created",
           color: Colors.green,
         );
-        var username = userid;
-        // resetFormState();
+
         return response.data;
       } else {
         showSnackBar(
@@ -302,15 +305,15 @@ class AddUsersProvider extends ChangeNotifier {
         "parent_about": about,
         "parent_phone": phone,
         "parent_email": email,
-        
-         "parent_StreetAddress":area,
-        "parent_city":city,
-        "parent_state":state,
-        "parent_PostalCode":pincode,
+        "parent_StreetAddress": area,
+        "parent_city": city,
+        "parent_state": state,
+        "region": region,
+        "parent_PostalCode": pincode,
         "user_image": await MultipartFile.fromFile(profileImage!.path,
             filename: fileName),
       });
-
+      print(formData.fields);
       Response response =
           await dio.post("$apiUrl/create_parent_profile", data: formData);
 
@@ -329,7 +332,7 @@ class AddUsersProvider extends ChangeNotifier {
       } else {
         showSnackBar(
           context,
-          message: 'Sumthing Want Wrong!',
+          message: 'Server Error!',
           color: Colors.red,
         );
         return false;

@@ -2,14 +2,27 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:schoolpenintern/Providers/AddUsersProvider.dart';
+import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
 
+import '../../../utiles/reagins.dart';
+import '../../Profile/Addprofile/Components/SelectOptionDropDown.dart';
 import '../constants/ConstantStrings.dart';
 import '../utils/Common_widgets.dart';
 import '../utils/client.dart';
 import 'choose_profile.dart';
 
-class FillRegion extends StatelessWidget {
+class FillRegion extends StatefulWidget {
   FillRegion({super.key});
+
+  @override
+  State<FillRegion> createState() => _FillRegionState();
+}
+
+class _FillRegionState extends State<FillRegion> {
+  String? reagins;
+  String? city;
 
   ProfileController profileController = Get.put(ProfileController());
 
@@ -20,7 +33,7 @@ class FillRegion extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        physics: BouncingScrollPhysics(),
+        physics: const BouncingScrollPhysics(),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,7 +53,7 @@ class FillRegion extends StatelessWidget {
                 "Welcome ${profileController.name.value},\nWhat is your region?",
                 textAlign: TextAlign.left,
                 style: GoogleFonts.lato(
-                    color: Color(0xff9163D7),
+                    color: const Color(0xff9163D7),
                     fontSize: 24,
                     fontWeight: FontWeight.w700),
               ),
@@ -49,27 +62,74 @@ class FillRegion extends StatelessWidget {
               padding: EdgeInsets.only(
                   top: MediaQuery.of(context).size.height * 0.03),
               child: Center(
-                  child: CommonTextfield(
-                type: "Normal",
-                Text: ConstantString.str8,
-                inputcontroller: regionControler,
-              )),
+                // child: CommonTextfield(
+                //   type: "Normal",
+                //   Text: ConstantString.str8,
+                //   inputcontroller: regionControler,
+                // ),
+                child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 22),
+                    child: Column(
+                      children: [
+                        SelectOptionDropDown(
+                          // padding: inputPadding,
+                          title: "",
+                          inputfillColor:
+                              const Color.fromARGB(111, 251, 227, 255),
+                          value: reagins,
+                          items: [...reagainData.keys],
+                          hintText: "Select Your Region",
+                          onChenge: (v) {
+                            setState(() {
+                              reagins = v;
+                            });
+                            // dataProvider.setData(getuserClass: v);
+                            return null;
+                          },
+                        ),
+                        const SizedBox(height: 10),
+                        reagins != null
+                            ? SelectOptionDropDown(
+                                // padding: inputPadding,
+                                title: "",
+                                inputfillColor:
+                                    const Color.fromARGB(111, 251, 227, 255),
+                                value: city,
+                                items: [...reagainData[reagins]],
+                                hintText: "Select Your City",
+                                onChenge: (v) {
+                                  setState(() {
+                                    city = v;
+                                  });
+                                  return null;
+                                },
+                              )
+                            : const SizedBox(),
+                      ],
+                    )),
+              ),
             ),
             Padding(
-              padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height * 0.12),
+              padding: const EdgeInsets.only(top: 30),
               child: Center(
-                  child: CustomButton(
-                      callback: () {
-                        if (regionControler.text.isNotEmpty) {
-                          profileController.region.value = regionControler.text;
-                          Get.to(() => ChooseProfile(),
-                              transition: Transition.fadeIn);
-                        } else {
-                          Fluttertoast.showToast(msg: "Region can't be empty");
-                        }
-                      },
-                      text: ConstantString.str6)),
+                child: CustomButton(
+                  callback: () {
+                    if (reagins != null && city != null) {
+                      Provider.of<AddUsersProvider>(context, listen: false)
+                          .setData(setregion: "$reagins ==> $city");
+                      Get.to(
+                        () => ChooseProfile(),
+                        transition: Transition.fadeIn,
+                      );
+                    } else {
+                      Fluttertoast.showToast(
+                        msg: "Please Selct Your Region",
+                      );
+                    }
+                  },
+                  text: ConstantString.str6,
+                ),
+              ),
             )
           ],
         ),

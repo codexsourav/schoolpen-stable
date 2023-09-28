@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
-import 'package:schoolpenintern/Screens/Teacher/Components/custom_button.dart';
-import 'package:schoolpenintern/Screens/Teacher/custom/strings.dart';
+import 'package:schoolpenintern/Screens/constants/strings.dart';
 
+import 'components/custom_button.dart';
 
 class ProfileFormPage extends StatefulWidget {
   const ProfileFormPage({

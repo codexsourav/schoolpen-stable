@@ -1,8 +1,8 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response, send_file, render_template
 from pymongo import  errors
 import re
 from gridfs import GridFS
-from bson import ObjectId
+from bson import ObjectId, Binary
 from flask_pymongo import PyMongo
 from werkzeug .security import generate_password_hash,check_password_hash
 from pymongo.errors import OperationFailure
@@ -25,11 +25,6 @@ mongo_t = PyMongo(app)
 app.config['MONGO_URI'] = 'mongodb://localhost:27017/Managements'
 mongo_m = PyMongo(app)
 
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/Quizes'
-mongo_q = PyMongo(app)
-
-app.config['MONGO_URI'] = 'mongodb://localhost:27017/connection'
-mongo_c = PyMongo(app)
 
 # UPLOAD_FOLDER = 'static'  # Folder to store uploaded images
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'jfif'}  # Allowed file extensions for images
@@ -73,6 +68,37 @@ def get_all_classes():
         all_classes.append(cls['name'])
     return all_classes
 
+
+def check_for_user(phone, user_id):
+    student_data = get_students()
+    teacher_data = get_teachers()
+    parent_data = get_parents()
+    management_data = get_managements()
+
+    phone_exists = False
+    useridname_exists = False
+
+
+    if phone:
+        phone_exists = any(item['personal_info']['contact']['phone'] == phone for item in student_data)
+        if not phone_exists:
+            phone_exists = any(item['profile']['contact']['phone'] == phone for item in teacher_data)
+        if not phone_exists:
+            phone_exists = any(item['personal_info']['contact']['parent_phone'] == phone for item in parent_data)
+        if not phone_exists:
+            phone_exists = any(item['personal_info']['contact']['phone'] == phone for item in management_data)
+
+    if user_id:
+        useridname_exists = any(item['user_id'] == user_id for item in student_data)
+        if not useridname_exists:
+            useridname_exists = any(item['profile']['useridname_password']['userid_name'] == user_id for item in teacher_data)
+        if not useridname_exists:
+            useridname_exists = any(item['parent_useridname'] == user_id for item in parent_data)
+        if not useridname_exists:
+            useridname_exists = any(item['user_id'] == user_id for item in management_data)
+    
+    return [phone_exists, useridname_exists]
+
 # Student Profile 
 # functions to support API's
 def is_student_user_id_unique(user_id):
@@ -99,6 +125,10 @@ def search_student(search_value):
             "user_id": student['user_id'],
             "username": student['username'],
             "user_image": student['user_image'],
+            'gender': student['gender'],
+            'status_title': student['status_title'],
+            'status_description': student['status_description'],
+            'about': student['personal_info']['about'],
         }
         return data
     return student
@@ -118,7 +148,9 @@ def search_parent(search_value):
             "role": parent['role'],
             "user_id": parent['parent_useridname'],
             "username": parent['parent_name'],
-            "user_image": parent['parent_image']
+            "user_image": parent['parent_image'],
+            'gender': parent['parent_gender'],
+            'about': parent['personal_info']['parent_about'],
         }
         return data
     return parent
@@ -137,6 +169,10 @@ def search_teacher(search_value):
             "user_id": teacher['profile']['useridname_password']['userid_name'],
             "username": teacher['username'],
             "user_image": teacher['user_image'],
+            'gender': teacher['gender'],
+            'status_title': teacher['profile']['status']['user_designation'],
+            'status_description': teacher['profile']['status']['user_description'],
+            'about': teacher['profile']['about'],
         }
         return data
     return teacher
@@ -145,31 +181,43 @@ def get_students():
     return list(mongo_s.db.student_profile.find())
 
 
+@app.route('/get_image/<image_id>/<role>', methods = ['GET'])
+def get_image(image_id, role):
+    try:
+        if role == "student":
+            image_data = mongo_s.db.images.find_one({"_id": ObjectId(image_id)})
+            if image_data:
+                response = app.response_class(image_data["image_data"], mimetype='image/jpeg')
+                return response
+            else:
+                return jsonify({"error": "Image not found"}), 404
+        elif role == "teacher":
+            image_data = mongo_t.db.images.find_one({"_id": ObjectId(image_id)})
+            if image_data:
+                response = app.response_class(image_data["image_data"], mimetype='image/jpeg')
+                return response
+            else:
+                return jsonify({"error": "Image not found"}), 404
+        elif role == "parent":
+            image_data = mongo_p.db.images.find_one({"_id": ObjectId(image_id)})
+            if image_data:
+                response = app.response_class(image_data["image_data"], mimetype='image/jpeg')
+                return response
+            else:
+                return jsonify({"error": "Image not found"}), 404
+        elif role == "management":
+            image_data = mongo_m.db.images.find_one({"_id": ObjectId(image_id)})
+            if image_data:
+                response = app.response_class(image_data["image_data"], mimetype='image/jpeg')
+                return response
+            else:
+                return jsonify({"error": "Image not found"}), 404
+    except Exception as e:
+        return jsonify({"error": "Error fetching the image.", "details": str(e)}), 500
+
+
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# def upload_image(image):
-#     if image and allowed_file(image.filename):
-#         filename = f"{ObjectId()}.{image.filename}"
-#         print(image)
-#         image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#         # return jsonify({"message": "Image uploaded successfully.", "filename": filename}), 200
-#         return filename
-#     else:
-#         return jsonify({"error": "Invalid image or file format."}), 400
-
-# def upload_image(image):
-#     if image and allowed_file(image.filename):
-#         try:
-#             fs = GridFS(mongo.db)
-#             image_data = image.read()
-#             file_id = fs.put(image_data, filename=image.filename)
-#             return str(file_id)
-#         except Exception as e:
-#             return jsonify({"error": "Error occurred while uploading the image.", "details": str(e)}), 500
-#     else:
-#         return jsonify({"error": "Invalid image or file format."}), 400
-
 
 def validate_password(password):
      """
@@ -301,7 +349,7 @@ def create_student_profile():
         "city":city,
         'state':state,
         "pincode":pincode
-    }
+    }   
     if not is_student_user_id_unique(user_id):
         return jsonify({'error': 'User ID already exists'}), 400
     
@@ -309,10 +357,9 @@ def create_student_profile():
     if 'user_image' in request.files:
             image = request.files['user_image']
             if image and allowed_file(image.filename):
-                fs = GridFS(mongo_s.db)
-                image_data = image.read()
-                user_image = fs.put(image_data, filename=image.filename)
-                user_image = str(user_image)
+                image_data = Binary(image.read())
+                image_id = mongo_s.db.images.insert_one({"image_data": image_data}).inserted_id
+                user_image = str(image_id)
             else:
                 return jsonify({"error": "Invalid image or file format."}), 400
 
@@ -382,24 +429,18 @@ def update_student_profile(user_id):
         else: 
             hashed_password = user_data['password']
         user_id = request.form.get('user_id')
-        if user_id:
-            data = get_students()
-            useridname=any(item['user_id'] == user_id for item in data)
-            if useridname:
-                return jsonify({"error": "This useridname is already exist"}), 400
-        else:
-             user_id = user_data['user_id']
+
         user_class = request.form.get('user_class', user_data['user_class'])
         status_title = request.form.get('status_title', user_data['status_title'])
         status_description = request.form.get('status_description', user_data['status_description'])
         about = request.form.get('about', user_data['personal_info']['about'])
-        phone = request.form.get('phone', user_data['personal_info']['contact']['phone'])
+        phone = request.form.get('phone')
         email = request.form.get('email', user_data['personal_info']['contact']['email'])
-        street = request.form.get('street', user_data['personal_info']['contact']['street'])
-        city = request.form.get('city', user_data['personal_info']['contact']['city'])
-        state = request.form.get('state', user_data['personal_info']['contact']['state'])
-        pincode = request.form.get('pincode', user_data['personal_info']['contact']['pincode'])
-        parents = request.form.get('parents', user_data['parents'])
+        street = request.form.get('street', user_data['personal_info']['contact']['address']['street'])
+        city = request.form.get('city', user_data['personal_info']['contact']['address']['city'])
+        state = request.form.get('state', user_data['personal_info']['contact']['address']['state'])
+        pincode = request.form.get('pincode', user_data['personal_info']['contact']['address']['pincode'])
+
 
         address = {
             "street":street,
@@ -408,18 +449,29 @@ def update_student_profile(user_id):
             "pincode":pincode
         }
         # Optional: Handle the user image update
-        user_image = ''
         if 'user_image' in request.files:
                 image = request.files['user_image']
                 if image and allowed_file(image.filename):
-                    fs = GridFS(mongo_s.db)
-                    image_data = image.read()
-                    user_image = fs.put(image_data, filename=image.filename)
-                    user_image = str(user_image)
+                    image_data = Binary(image.read())
+                    image_id = mongo_s.db.images.insert_one({"image_data": image_data}).inserted_id
+                    user_image = str(image_id)
                 else:
                     return jsonify({"error": "Invalid image or file format."}), 400
         else:
              user_image = user_data['user_image']
+        result = check_for_user(phone,user_id)
+        phone_exists = result[0]
+        useridname = result[1]
+
+        if phone_exists:
+                return jsonify({"error": "This phone number is already exist"}), 400
+        else:
+            phone = user_data['personal_info']['contact']['phone']
+        if useridname:
+            return jsonify({"error": "This useridname is already exist"}), 400
+        else:
+            useridname = user_data['user_id']
+
         user_data ={
                 'user_id':user_id,
                 'username': username,
@@ -436,7 +488,7 @@ def update_student_profile(user_id):
                         'address': address
                     }
                 },
-                'parents': parents
+        
             }
         result = mongo_s.db.student_profile.update_one({"_id":_id},
                                                     {"$set": user_data})
@@ -449,93 +501,17 @@ def update_student_profile(user_id):
 
 
 
-# setting status of quiz after click by user on quiz 
-@app.route('/setting_status/<string:quiz_id>/<string:student_id>', methods = ['PUT'])
-def setting_status_of_quizz(quiz_id, student_id):
-
-    new_quiz = {
-        "quiz_id": quiz_id,
-        "status": "seen"
-    }
-    # Define the update operation to add the new quiz to the quiz_data array
-    update = {
-        '$push': {
-            'quiz_data': {
-                '$each': [new_quiz],
-            }
-        }
-    }
-
-    mongo_s.db.student_profile.update_one({'_id': student_id}, update)
-    return "Quizz seen",200
-
-
-#adding quizz in student profile
-@app.route('/update_student_quiz_data/<string:quiz_id>/<string:student_id>/<string:result>/<string:click>', methods=['PUT'])
-def update_student_quiz_data(quiz_id, student_id, result, click):
-    try:
-        student = mongo_s.db.student_profile.find_one({"_id": student_id})
-        
-        if student:
-            # Check if the quiz_id already exists in quiz_data
-            quiz_entry = next((entry for entry in student['quiz_data'] if entry.get('quiz_id') == quiz_id), None)
-
-            if quiz_entry:
-                quiz = mongo_q.db.quizes.find_one({"_id": quiz_id})
-                # Update the existing quiz entry
-                quiz_entry['subject'] = quiz.get('subject', '')
-                quiz_entry['topic'] = quiz.get('topic', '')
-                quiz_entry['class'] = quiz.get('class', '')
-                quiz_entry['subtopic'] = quiz.get('subtopic', '')
-                quiz_entry['language'] = quiz.get('language', '')            
-                quiz_entry['result'] = result
-                quiz_entry['clicked_on'] = click
-
-                # Update the student's document with the modified quiz_data
-                mongo_s.db.student_profile.update_one({"_id": student_id}, {"$set": student})
-
-                return jsonify({"message": "Student quiz data updated successfully."}), 200
-            else:
-                return jsonify({"error": "Quiz not found in student data."}), 400
-        else:
-            return jsonify({"error": "Student not found."}), 400
-
-    except Exception as e:
-        return jsonify({"error": "An error occurred.", "error": str(e)}), 500
-
-
-# getting accuracy of student
-@app.route('/getting_accuracy/<string:student_id>', methods=['GET'])
-def getting_accuracy(student_id):
-    try:
-        student = mongo_s.db.student_profile.find_one({"_id": student_id})
-        result = []
-        for res in student.get("quiz_data", []):
-            try:
-                result.append(res['result'])
-            except KeyError:
-                # Key 'result' not found in this quiz data, continue to the next iteration
-                continue
-        return jsonify(result), 200
-    except Exception as e:
-        return jsonify({"error": "An error occurred.", "error": str(e)}), 500
-
-
-
-
 # Management Profile 
 
 # functions to support API's
-def is_management_user_id_unique(user_id):
-    user = get_management(user_id)
-    return user
 
 def get_management(user_id):
     user = mongo_m.db.management_profile.find_one({'user_id': user_id})
     if user:
         user['_id'] = str(user['_id'])  # Convert ObjectId to a string
-    return jsonify(user)
-
+        return jsonify(user)
+    else:
+        return None
 
 def get_managements():
     return list(mongo_m.db.management_profile.find())
@@ -555,7 +531,6 @@ def create_management_profile():
     gender = request.form.get('gender')
     dob = request.form.get('dob')
     region = request.form.get('region','')
-    status_title = request.form.get('status_title', '')
     about = request.form.get('about', '')
     phone = request.form.get('phone', '')
     email = request.form.get('email', '')
@@ -571,19 +546,17 @@ def create_management_profile():
         'state':state,
         "pincode":pincode
     }
-    if not is_management_user_id_unique(user_id):
-        return jsonify({'error': 'User ID already exists'}), 400
     
     user_image = ''
     if 'user_image' in request.files:
             image = request.files['user_image']
             if image and allowed_file(image.filename):
-                fs = GridFS(mongo_m.db)
-                image_data = image.read()
-                user_image = fs.put(image_data, filename=image.filename)
-                user_image = str(user_image)
+                image_data = Binary(image.read())
+                image_id = mongo_m.db.images.insert_one({"image_data": image_data}).inserted_id
+                user_image = str(image_id)
             else:
                 return jsonify({"error": "Invalid image or file format."}), 400
+
 
     school_performance = {} 
     result = check_for_user(phone,user_id)
@@ -606,7 +579,6 @@ def create_management_profile():
             'gender': gender,
             'dob': dob,
             'user_image': user_image,
-            'status_title': status_title,
             'personal_info': {
                 'about': about,
                 'contact': {
@@ -642,18 +614,15 @@ def update_management_profile(user_id):
             hashed_password = generate_password_hash(password)
         else:
             hashed_password = user_data['password']
-        user_id = request.form.get('user_id', user_data['user_id'])
+        user_id = request.form.get('user_id')
 
-        user_class = request.form.get('user_class', user_data['user_class'])
-        status_title = request.form.get('status_title', user_data['status_title'])
         about = request.form.get('about', user_data['personal_info']['about'])
-        phone = request.form.get('phone', user_data['personal_info']['contact']['phone'])
+        phone = request.form.get('phone')
         email = request.form.get('email', user_data['personal_info']['contact']['email'])
         street = request.form.get('street', user_data['personal_info']['contact']['street'])
         city = request.form.get('city', user_data['personal_info']['contact']['city'])
         state = request.form.get('state', user_data['personal_info']['contact']['state'])
         pincode = request.form.get('pincode', user_data['personal_info']['contact']['pincode'])
-        school_performance = request.form.get('school_performance', user_data['school_performance'])
 
         address = {
             "street":street,
@@ -663,26 +632,33 @@ def update_management_profile(user_id):
         }
 
         # Optional: Handle the user image update
-        user_image = ''
         if 'user_image' in request.files:
                 image = request.files['user_image']
                 if image and allowed_file(image.filename):
-                    fs = GridFS(mongo_m.db)
-                    image_data = image.read()
-                    user_image = fs.put(image_data, filename=image.filename)
-                    user_image = str(user_image)
+                    image_data = Binary(image.read())
+                    image_id = mongo_m.db.images.insert_one({"image_data": image_data}).inserted_id
+                    user_image = str(image_id)
                 else:
                     return jsonify({"error": "Invalid image or file format."}), 400
         else:
              user_image = user_data['user_image']
+        result = check_for_user(phone,user_id)
+        phone_exists = result[0]
+        useridname = result[1]
 
+        if phone_exists:
+                return jsonify({"error": "This phone number is already exist"}), 400
+        else:
+            phone = user_data['personal_info']['contact']['phone']
+        if useridname:
+            return jsonify({"error": "This useridname is already exist"}), 400
+        else:
+            useridname = user_data['user_id']
         user_data ={
                 'user_id':user_id,
                 'username': username,
                 'password':hashed_password,
-                'user_class': user_class,
                 'user_image': user_image,
-                'status_title': status_title,
                 'personal_info': {
                     'about': about,
                     'contact': {
@@ -690,8 +666,7 @@ def update_management_profile(user_id):
                         'email': email,
                         'address': address
                     }
-                },
-                'school_performance': school_performance,
+                }
             }
         result = mongo_m.db.management_profile.update_one({"_id":_id},
                                                     {"$set": user_data})
@@ -711,18 +686,24 @@ parent_profile_collection=mongo_p.db.parent_profile
 #get profile by userid
 @app.route('/parent_data/<string:search_value>', methods=['GET'])
 def fetch_parent_data(search_value):
-    parent = mongo_p.db.parent_profile.find_one({'parent_useridname': search_value})
-    if parent:
+    parent_data = mongo_p.db.parent_profile.find_one({'parent_useridname': search_value})
+    if parent_data:
         # Modify this part to select the specific fields you want to return
         parent_info = {
-            "parent_name": parent['parent_name'],
-            "parent_image": parent['parent_image'],
-            "parent_useridname":parent['parent_useridname'],
-            "parent_age": parent['parent_age'],
-            "parent_gender": parent['parent_gender'],
-            "parent_designation": parent['parent_name'],
-            "parent_description": parent['parent_name'],
-            "parent_email": parent['personal_info']['contact']['parent_email'],
+            "parent_useridname":parent_data['parent_useridname'],
+            'parent_name': parent_data['parent_name'],
+            "parent_age":parent_data['parent_age'],
+            "parent_DOB":parent_data["parent_DOB"],
+            "parent_gender":parent_data['parent_gender'],
+            'parent_about': parent_data['personal_info']['parent_about'],
+            'parent_phone': parent_data['personal_info']['contact']['parent_phone'],
+            'parent_email': parent_data['personal_info']['contact']['parent_email'],
+            "parent_country":parent_data['personal_info']['contact']['parent_address']['parent_country'],
+            "parent_state":parent_data['personal_info']['contact']['parent_address']['parent_state'],
+            "parent_StreetAddress":parent_data['personal_info']['contact']['parent_address']['parent_StreetAddress'],
+            "parent_city":parent_data['personal_info']['contact']['parent_address']['parent_city'],
+            "parent_PostalCode":parent_data['personal_info']['contact']['parent_address']['parent_PostalCode'],
+            "parent_image":parent_data['parent_image']
         }
         return jsonify(parent_info)
     else:
@@ -759,14 +740,13 @@ def create_parent_profile():
         
         user_image = ''
         if 'user_image' in request.files:
-                image = request.files['user_image']
-                if image and allowed_file(image.filename):
-                    fs = GridFS(mongo_p.db)
-                    image_data = image.read()
-                    user_image = fs.put(image_data, filename=image.filename)
-                    user_image = str(user_image)
-                else:
-                    return jsonify({"error": "Invalid image or file format."}), 400
+            image = request.files['user_image']
+            if image and allowed_file(image.filename):
+                image_data = Binary(image.read())
+                image_id = mongo_p.db.images.insert_one({"image_data": image_data}).inserted_id
+                user_image = str(image_id)
+            else:
+                return jsonify({"error": "Invalid image or file format."}), 400
 
         result = check_for_user(parent_phone,parent_useridname)
 
@@ -816,20 +796,19 @@ def create_parent_profile():
 #update parent info
 @app.route('/update_parent/<string:useridname>', methods=['PUT'])
 def update_parent_profile(useridname):
-    parent_data = get_parent(useridname)
+    parent_data = mongo_p.db.parent_profile.find_one({'parent_useridname': useridname})
     if not parent_data:
         return jsonify({"error": "Parent not found"}), 400
     # Update parent information based on the received data
 
     # Example: Update the 'parent_name', 'parent_designation', and 'parent_description'
-    parent_data['parent_useridname'] = request.form.get('parent_useridname', parent_data['parent_useridname'])
+    user_id = request.form.get('parent_useridname')
     parent_data['parent_name'] = request.form.get('parent_name', parent_data['parent_name'])
     parent_data['parent_age'] = request.form.get('parent_age', parent_data['parent_age'])
     parent_data["parent_DOB"]=request.form.get('parent_DOB',parent_data["parent_DOB"])
     parent_data['parent_gender'] = request.form.get('parent_gender', parent_data['parent_gender'])
-    # Example: Update the 'parent_about', 'parent_phone', 'parent_email', and 'parent_address' within 'personal_info'
     parent_data['personal_info']['parent_about'] = request.form.get('parent_about', parent_data['personal_info']['parent_about'])
-    parent_data['personal_info']['contact']['parent_phone'] = request.form.get('parent_phone', parent_data['personal_info']['contact']['parent_phone'])
+    phone = request.form.get('parent_phone')
     parent_data['personal_info']['contact']['parent_email'] = request.form.get('parent_email', parent_data['personal_info']['contact']['parent_email'])
 
     parent_separate_data =  parent_data['personal_info']['contact']['parent_address']
@@ -838,49 +817,54 @@ def update_parent_profile(useridname):
     parent_separate_data['parent_state'] = request.form.get('parent_state', parent_separate_data['parent_state'])
     parent_separate_data['parent_city'] = request.form.get('parent_city', parent_separate_data['parent_city'])
     parent_separate_data['parent_StreetAddress'] = request.form.get('parent_StreetAddress', parent_separate_data['parent_StreetAddress'])
-    parent_separate_data['parent_Apartment'] = request.form.get('parent_Apartment', parent_separate_data['parent_Apartment'])
     parent_separate_data['parent_PostalCode'] = request.form.get('parent_PostalCode', parent_separate_data['parent_PostalCode'])
-    user_image = ''
-    if 'image' in request.files:
-            image = request.files['image']
-            if image and allowed_file(image.filename):
-                fs = GridFS(mongo_p.db)
-                image_data = image.read()
-                user_image = fs.put(image_data, filename=image.filename)
-                user_image = str(user_image)
-                parent_data['user_image'] = user_image
-            else:
-                return jsonify({"error": "Invalid image or file format."}), 400
 
+    if user_id or phone:
+        result = check_for_user(phone,user_id)
+        phone_exists = result[0]
+        useridname = result[1]
 
-     # Update password if provided
+    if phone_exists:
+            return jsonify({"error": "This phone number is already exist"}), 400
+    # else:
+    #     parent_data['personal_info']['contact']['parent_phone'] = request.form.get('parent_phone', parent_data['personal_info']['contact']['parent_phone'])
+
+    if useridname:
+        return jsonify({"error": "This useridname is already exist"}), 400
+    # else:
+    #     parent_data['parent_useridname'] = request.form.get('parent_useridname', parent_data['parent_useridname'])
+
+    
+    if 'user_image' in request.files:
+        image = request.files['user_image']
+        if image and allowed_file(image.filename):
+            image_data = Binary(image.read())
+            image_id = mongo_p.db.images.insert_one({"image_data": image_data}).inserted_id
+            parent_data['parent_image'] = str(image_id)
+        else:
+            return jsonify({"error": "Invalid image or file format."}), 400
+
     new_password = request.form.get('new_password')
     if new_password:
-        # You may want to add validation and hashing here
         parent_data['parent_hashed_password'] = generate_password_hash(new_password)
 
-    # Save the updated parent data 
     update_parent(parent_data)
 
     return jsonify({"message": "Parent information updated successfully"}), 200
 
+
+
 #database support function
-
-
 #get all parent info
 def get_parents():
     return list(parent_profile_collection.find({}))
 
-
-
 #serch parent by their unique identity
 def get_parent(parent_useridname):
     user = mongo_p.db.parent_profile.find_one({'parent_useridname': parent_useridname})
-    print(f"\n\n{user}\n\n")
     if user:
         user['_id'] = str(user['_id'])  # Convert ObjectId to a string
     return jsonify(user)
-
 
 
 #update parent info
@@ -931,8 +915,6 @@ def create_teacher(user_data):
         }
     }).inserted_id
     inserted = get_teacher(ObjectId(inserted_i))
-    # print("INSERTED_I:", inserted_i)
-    # print("INSERTED:", inserted)
     return inserted
 
 def get_teachers():
@@ -978,7 +960,40 @@ def update_teacher(user_id, user_data):
         }}
     )
 
+@app.route('/get_teacher_profile/<string:user_id>', methods = ['GET'])
+def get_teacher_profile(user_id):
+    user_data = mongo_t.db.teacher_profile.find_one({'profile.useridname_password.userid_name': user_id})
+    if user_data:
+        info = {
+        'username': user_data['username'],
+        'languages': user_data['languages'],
+        'user_image': user_data['user_image'],
+        'gender': user_data['gender'],
+        'dob': user_data['dob'],
+        'profile': {
+            'status': {
+                'user_designation': user_data['profile']['status']['user_designation'],
+                'user_description': user_data['profile']['status']['user_description']
+            },
+            'about': user_data['profile']['about'],
+            'useridname_password': {
+                'userid_name': user_data['profile']['useridname_password']['userid_name'],
+            },
+            'contact': {
+                'phone': user_data['profile']['contact']['phone'],
+                'email': user_data['profile']['contact']['email'],
+                'address': {
+                    'house_no': user_data['profile']['contact']['address']['house_no'],
+                    'street': user_data['profile']['contact']['address']['street'],
+                    'postal_code': user_data['profile']['contact']['address']['postal_code'],
+                    'city': user_data['profile']['contact']['address']['city'],
+                    'state': user_data['profile']['contact']['address']['state']
+                }
+            }
+        }
+    }
 
+    return jsonify(info) 
 # --------------- API METHODS --------------
 
 @app.route('/get_teachers_profile', methods=['GET'])
@@ -991,7 +1006,7 @@ def get_teachers_profile():
     return jsonify(teachers)
 
 @app.route('/get_teacher/<string:user_id>', methods=['GET'])
-def get_teacher_profile(user_id):
+def get_teacher_prof(user_id):
     user = mongo_t.db.teacher_profile.find_one({'profile.useridname_password.userid_name': user_id})
     if user:
         teacher_info = {
@@ -1000,6 +1015,7 @@ def get_teacher_profile(user_id):
             'languages': user['languages'],
             "userid_name":user['profile']['useridname_password']['userid_name'],
             "gender": user['gender'],
+            "about": user['profile']['about'],
             'status': {
                 'user_designation': user['profile']['status']['user_designation'],
                 'user_description': user['profile']['status']['user_description']
@@ -1028,10 +1044,9 @@ def create_teacher_profile():
     if 'user_image' in request.files:
             image = request.files['user_image']
             if image and allowed_file(image.filename):
-                fs = GridFS(mongo_t.db)
-                image_data = image.read()
-                user_image = fs.put(image_data, filename=image.filename)
-                user_image = str(user_image)
+                image_data = Binary(image.read())
+                image_id = mongo_t.db.images.insert_one({"image_data": image_data}).inserted_id
+                user_image = str(image_id)
             else:
                 return jsonify({"error": "Invalid image or file format."}), 400
 
@@ -1126,15 +1141,30 @@ def update_user_profile(user_id):
 
     about = request.form.get('user_about', user_data['profile']['about'])
 
-    userid_name = request.form.get('userid_name',  user_data['profile']['useridname_password']['userid_name'])
+    # userid_name = request.form.get('userid_name',  user_data['profile']['useridname_password']['userid_name'])
+    userid_name = request.form.get('userid_name')
+    if userid_name == '' or not userid_name:
+        userid_name = user_data['profile']['useridname_password']['userid_name']
+        print("USERIDNAME:", userid_name)
+    else:
+        if check_for_user(phone=None, user_id=userid_name)[1]:
+            return jsonify({'error': 'Useridname already exists!!'})
+        
     if request.form.get('password'):
         password = generate_password_hash(request.form.get('password'))
     else:
         password = user_data['profile']['useridname_password']['password']
 
-    phone = request.form.get('phone', user_data['profile']['contact']['phone'])
-    email = request.form.get('email', user_data['profile']['contact']['email'])
+    # phone = request.form.get('phone', user_data['profile']['contact']['phone'])
+    phone = request.form.get('phone')
+    if phone == '' or not userid_name:
+        phone = user_data['profile']['contact']['phone']
+    else:
+        if check_for_user(phone=phone, user_id=None)[0]:
+            return jsonify({'error': 'Phone already exists!!'})
+        
 
+    email = request.form.get('email', user_data['profile']['contact']['email'])
     house_no = request.form.get('house_no', user_data['profile']['contact']['address']['house_no'])
     street = request.form.get('street', user_data['profile']['contact']['address']['street'])
     postal_code = request.form.get('postal_code', user_data['profile']['contact']['address']['postal_code'])
@@ -1149,16 +1179,15 @@ def update_user_profile(user_id):
         'state': state
     }
 
-    user_image = ''
     if 'user_image' in request.files:
             image = request.files['user_image']
             if image and allowed_file(image.filename):
-                fs = GridFS(mongo_t.db)
-                image_data = image.read()
-                user_image = fs.put(image_data, filename=image.filename)
-                user_image = str(user_image)
+                image_data = Binary(image.read())
+                image_id = mongo_t.db.images.insert_one({"image_data": image_data}).inserted_id
+                user_image = str(image_id)
             else:
                 return jsonify({"error": "Invalid image or file format."}), 400
+
     else:
         user_image = user_data['user_image']
 
@@ -1206,38 +1235,6 @@ def update_user_profile(user_id):
     updated_user['_id'] = str(updated_user['_id'])
 
     return jsonify(updated_user)
-
-
-
-def check_for_user(phone, user_id):
-    student_data = get_students()
-    teacher_data = get_teachers()
-    parent_data = get_parents()
-    management_data = get_managements()
-
-    phone_exists = False
-    useridname_exists = False
-
-
-    if phone:
-        phone_exists = any(item['personal_info']['contact']['phone'] == phone for item in student_data)
-        if not phone_exists:
-            phone_exists = any(item['profile']['contact']['phone'] == phone for item in teacher_data)
-        if not phone_exists:
-            phone_exists = any(item['personal_info']['contact']['parent_phone'] == phone for item in parent_data)
-        if not phone_exists:
-            phone_exists = any(item['personal_info']['contact']['phone'] == phone for item in management_data)
-
-    if user_id:
-        useridname_exists = any(item['user_id'] == user_id for item in student_data)
-        if not useridname_exists:
-            useridname_exists = any(item['profile']['useridname_password']['userid_name'] == user_id for item in teacher_data)
-        if not useridname_exists:
-            useridname_exists = any(item['parent_useridname'] == user_id for item in parent_data)
-        if not useridname_exists:
-            useridname_exists = any(item['user_id'] == user_id for item in management_data)
-    
-    return [phone_exists, useridname_exists]
 
 
 

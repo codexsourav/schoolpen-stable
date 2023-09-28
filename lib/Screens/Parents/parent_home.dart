@@ -2,20 +2,17 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_advanced_drawer/flutter_advanced_drawer.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
-import 'package:schoolpenintern/Screens/Profile/ViewProfile/view_parent_profile.dart';
+import 'package:schoolpenintern/Screens/Chat/ChatHome/NewChatHome.dart';
+import 'package:schoolpenintern/Screens/Profile/ViewUserProfile.dart';
 import 'package:schoolpenintern/Screens/Teacher/Theme/Colors/appcolors.dart';
-
-import 'Components/parent_all_teacher.dart';
-import 'Components/parent_courses_enrolled.dart';
+import 'package:schoolpenintern/utiles/LoadImage.dart';
+import '../SearchUser/SearchUsers.dart';
 import 'Components/parent_custom_card.dart';
 import 'Components/parent_section_buttons.dart';
-import 'Components/parent_teacher_info_card.dart';
-import 'Components/parent_teachers_note.dart';
-import 'Components/parents_lesson_card.dart';
 import 'Components/parents_your_kids_card.dart';
-import 'Components/upcoming_event_card.dart';
 import 'custom/drawer.dart';
 
 class ParentHomePage extends StatefulWidget {
@@ -33,8 +30,8 @@ class _ParentHomePageState extends State<ParentHomePage> {
   int currentPageTommorow = 0;
 
   final List<Map<String, dynamic>> data = [
-    {'imagePath': 'assets/images/tina.png', 'name': 'Tina'},
-    {'imagePath': 'assets/images/rohit.png', 'name': 'Rohit'},
+    // {'imagePath': 'assets/images/tina.png', 'name': 'Tina'},
+    // {'imagePath': 'assets/images/rohit.png', 'name': 'Rohit'},
   ];
 
   final List<Map<String, String>> lessonData = [
@@ -70,7 +67,6 @@ class _ParentHomePageState extends State<ParentHomePage> {
   ];
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     controller.dispose();
   }
@@ -91,10 +87,8 @@ class _ParentHomePageState extends State<ParentHomePage> {
             child:
                 Image.asset("assets/images/backgroud.png", fit: BoxFit.fill)),
         childDecoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-        drawer: DrawerScreen(
-          schoolName: parentProvider.parentprofile!.parentName.toString(),
+        drawer: const DrawerScreen(
           location: '',
-          profileImg: 'assets/images/parantsImage.png',
         ),
         child: Scaffold(
           backgroundColor: Colors.white,
@@ -102,7 +96,7 @@ class _ParentHomePageState extends State<ParentHomePage> {
             currentIndex: 0,
             iconSize: 25,
             type: BottomNavigationBarType.fixed,
-            selectedItemColor: AppColors.parentPrimary,
+            selectedItemColor: const Color.fromARGB(255, 81, 196, 133),
             onTap: (value) {},
             unselectedItemColor: AppColors.black.withOpacity(0.5),
             items: const [
@@ -138,24 +132,43 @@ class _ParentHomePageState extends State<ParentHomePage> {
                 ),
                 toolbarHeight: 70,
                 actions: [
-                  const CircleAvatar(
+                  CircleAvatar(
                     radius: 18,
                     backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.search,
-                      size: 25,
-                      color: Color(0xff83D39D),
+                    child: GestureDetector(
+                      onTap: () {
+                        Get.to(SearchUserProfile());
+                      },
+                      child: const Icon(
+                        Icons.search,
+                        size: 25,
+                        color: Color(0xff83D39D),
+                      ),
                     ),
                   ),
                   const SizedBox(
                     width: 10,
                   ),
-                  const CircleAvatar(
-                    radius: 18,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.messenger,
-                      color: Color(0xff83D39D),
+                  GestureDetector(
+                    onTap: () {
+                      Get.to(NewChatHome(
+                        myuserid: parentProvider.parentprofile!.parentUseridname
+                            .toString(),
+                        myid: parentProvider.parentprofile!.parentUseridname
+                            .toString(),
+                        role: 'parent',
+                        image: parentProvider.parentprofile!.parentImage
+                            .toString(),
+                      ));
+                      // Get.to(()=>NewChatHome(role: "parent",myid:"rish03",));
+                    },
+                    child: const CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Colors.white,
+                      child: Icon(
+                        Icons.messenger,
+                        color: Color(0xff83D39D),
+                      ),
                     ),
                   ),
                   const SizedBox(
@@ -175,16 +188,35 @@ class _ParentHomePageState extends State<ParentHomePage> {
                   ),
                   InkWell(
                     onTap: () {
-                      Get.to(() => ViewParentProfile());
+                      Get.to(ViewUserProfile(
+                          userid: Provider.of<UserProfileProvider>(context,
+                                  listen: false)
+                              .parentprofile!
+                              .parentUseridname
+                              .toString(),
+                          role: 'parent'));
+                      //     Get.to(()=>ViewParentProfile());
                     },
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: AssetImage(
-                            'assets/images/parantsImage.png',
+                    child: Center(
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50)),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(50),
+                          child: Image.network(
+                            loadImage(
+                              Provider.of<UserProfileProvider>(context,
+                                      listen: false)
+                                  .parentprofile!
+                                  .parentImage
+                                  .toString(),
+                              "parent",
+                            ),
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
                           ),
                         ),
                       ),
@@ -212,17 +244,15 @@ class _ParentHomePageState extends State<ParentHomePage> {
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              const SliverToBoxAdapter(
+              SliverToBoxAdapter(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 15.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 15.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text("Your Kids",
-                          style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.black)),
+                          style: GoogleFonts.lato(
+                              fontSize: 18, fontWeight: FontWeight.bold)),
                       // Icon(
                       //   Icons.calendar_today,
                       //   size: 25,
@@ -242,16 +272,17 @@ class _ParentHomePageState extends State<ParentHomePage> {
                       itemBuilder: (context, index) {
                         if (index == data.length) {
                           return Padding(
-                            padding: const EdgeInsets.only(left: 10),
+                            padding:
+                                const EdgeInsets.only(left: 30, bottom: 30),
                             child: Container(
-                              height: 20,
+                              height: 50,
                               width: 50,
                               margin: const EdgeInsets.only(bottom: 5),
-                              decoration: BoxDecoration(
+                              decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: Color(0xFFEFFAF3),
                               ),
-                              child: Center(
+                              child: const Center(
                                 child: Icon(
                                   Icons.add,
                                   color: Color(0xFF83D39D),
@@ -272,98 +303,79 @@ class _ParentHomePageState extends State<ParentHomePage> {
                   ),
                 ),
               ),
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(10, 0, 10, 4),
-                  padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
-                  width: 328,
-                  height: 64,
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      fit: BoxFit.cover,
-                      image: AssetImage('assets/images/union.png'),
-                    ),
-                  ),
-                  child: Center(
-                    child: SizedBox(
-                      child: Container(
-                        constraints: const BoxConstraints(
-                          maxWidth: 278,
-                        ),
-                        child: RichText(
-                          text: const TextSpan(
-                            style: TextStyle(
-                              fontFamily: 'Lato',
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              height: 1.25,
-                              color: Color(0xff383838),
-                            ),
-                            children: [
-                              TextSpan(
-                                text: 'Tina',
-                                style: TextStyle(
-                                  fontFamily: 'Lato',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.25,
-                                  color: Color(0xff383838),
-                                ),
-                              ),
-                              TextSpan(
-                                text: ' is attending her ',
-                                style: TextStyle(
-                                  fontFamily: 'Lato',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.25,
-                                  color: Color(0xff383838),
-                                ),
-                              ),
-                              TextSpan(
-                                text: 'Biology',
-                                style: TextStyle(
-                                  fontFamily: 'Lato',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.25,
-                                  color: Color(0xff383838),
-                                ),
-                              ),
-                              TextSpan(
-                                text: ' Class with Mrs. Shalini ',
-                                style: TextStyle(
-                                  fontFamily: 'Lato',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.25,
-                                  color: Color(0xff383838),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: EdgeInsets.fromLTRB(278, 10, 10, 5),
-                  child: Text(
-                    '5 min ago',
-                    textAlign: TextAlign.right,
-                    style: TextStyle(
-                      fontFamily: 'Lato',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      height: 1,
-                      color: Color(0xff707070),
-                    ),
-                  ),
-                ),
-              ),
+              // SliverToBoxAdapter(
+              //   child: Container(
+              //     margin: const EdgeInsets.fromLTRB(10, 0, 10, 4),
+              //     padding: const EdgeInsets.fromLTRB(8, 12, 8, 12),
+              //     width: 328,
+              //     height: 64,
+              //     decoration: const BoxDecoration(
+              //       image: DecorationImage(
+              //         fit: BoxFit.cover,
+              //         image: AssetImage('assets/images/union.png'),
+              //       ),
+              //     ),
+              //     child: Center(
+              //       child: SizedBox(
+              //         child: Container(
+              //           constraints: const BoxConstraints(
+              //             maxWidth: 278,
+              //           ),
+              //           child: RichText(
+              //             text:  TextSpan(
+              //               style:GoogleFonts.lato(
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       ),
+              //               children: [
+              //                 TextSpan(
+              //                   text: 'Tina',
+              //                   style: GoogleFonts.lato(
+              //                     color: Colors.black,
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //                 ),
+              //                 TextSpan(
+              //                   text: ' is attending her ',
+              //                   style: GoogleFonts.lato(
+              //                        color: Colors.black,
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //                 ),
+              //                 TextSpan(
+              //                   text: 'Biology',
+              //                   style:GoogleFonts.lato(
+              //                        color: Colors.black,
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //                 ),
+              //                 TextSpan(
+              //                   text: ' Class with Mrs. Shalini ',
+              //                   style: GoogleFonts.lato(
+              //                        color: Colors.black,
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //                 ),
+              //               ],
+              //             ),
+              //           ),
+              //         ),
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              // SliverToBoxAdapter(
+              //   child: Container(
+              //     margin: EdgeInsets.fromLTRB(278, 10, 10, 5),
+              //     child: Text(
+              //       '5 min ago',
+              //       textAlign: TextAlign.right,
+              //       style: GoogleFonts.lato(
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //     ),
+              //   ),
+              // ),
+
               const SliverToBoxAdapter(
                 child: SizedBox(
                   height: 20,
@@ -418,466 +430,439 @@ class _ParentHomePageState extends State<ParentHomePage> {
                   ),
                 ),
               ),
+              // SliverToBoxAdapter(
+              //   child: Container(
+              //     margin: const EdgeInsets.fromLTRB(10, 0, 16, 0),
+              //     width: double.infinity,
+              //     child: Row(
+              //       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //       crossAxisAlignment: CrossAxisAlignment.center,
+              //       children: [
+              //         Text(
+              //           'Her Classes',
+              //           style: GoogleFonts.lato(
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //         ),
+              //         Opacity(
+              //           opacity: 0.7,
+              //           child: SizedBox(
+              //             width: 30, // Set your custom width here
+              //             height: 30, // Set your custom height here
+              //             child: Image.asset(
+              //               'assets/images/group-3855.png',
+              //             ),
+              //           ),
+              //         ),
+              //       ],
+              //     ),
+              //   ),
+              // ),
+              // SliverToBoxAdapter(
+              //   child: CarouselSlider.builder(
+              //     carouselController: _controller,
+              //     itemCount: lessonData
+              //         .length, // Use the length of your lessonData list
+              //     itemBuilder:
+              //         (BuildContext context, int itemIndex, int pageViewIndex) {
+              //       final lesson = lessonData[
+              //           itemIndex]; // Get the lesson data for the current index
+              //       return LessonCard(
+              //         title: lesson['title'] ?? '',
+              //         subtitle: lesson['subtitle'] ?? '',
+              //         teacherName: lesson['teacherName'] ?? '',
+              //         imageAsset: lesson['imageAsset'] ?? '',
+              //         iconAsset: lesson['iconAsset'] ?? '',
+              //       );
+              //     },
+              //     options: CarouselOptions(
+              //       enableInfiniteScroll: false,
+              //       viewportFraction: 1,
+              //       onPageChanged: (index, reason) {
+              //         setState(() {
+              //           currentPageToday = index;
+              //         });
+              //       },
+              //     ),
+              //   ),
+              // ),
+//               SliverToBoxAdapter(
+//                 child: Row(
+//                   mainAxisAlignment: MainAxisAlignment.center,
+//                   children: [
+//                     for (int i = 0; i < itemCount; i++)
+//                       Container(
+//                         width: 8.0,
+//                         height: 8.0,
+//                         margin: const EdgeInsets.symmetric(
+//                             vertical: 10, horizontal: 2),
+//                         decoration: BoxDecoration(
+//                           shape: BoxShape.circle,
+//                           color: currentPageToday == i
+//                               ? AppColors.black
+//                               : AppColors.lightGrey,
+//                         ),
+//                       ),
+//                   ],
+//                 ),
+//               ),
+//               SliverToBoxAdapter(
+//                 child: Padding(
+//                   padding: const EdgeInsets.only(left: 10),
+//                   child: Text(
+//                     'Her Class Teacher',
+//                     style: GoogleFonts.lato(
+//  fontSize: 16,fontWeight: FontWeight.bold
+//                     )
+//                 ),
+//               ),),
+//               const SliverToBoxAdapter(child: SizedBox(height: 20)),
+//               SliverToBoxAdapter(
+//                 child: Padding(
+//                   padding: const EdgeInsets.only(left: 20.0, right: 20),
+//                   child: TeacherInfoCard(
+//                       teacherName: 'Shalini Ray',
+//                       subject: 'Social Science',
+//                       imageUrl:
+//                           'https://media.istockphoto.com/id/1309328823/photo/headshot-portrait-of-smiling-male-employee-in-office.jpg?b=1&s=612x612&w=0&k=20&c=eU56mZTN4ZXYDJ2SR2DFcQahxEnIl3CiqpP3SOQVbbI='),
+//                 ),
+//               ),
+//               const SliverToBoxAdapter(child: SizedBox(height: 20)),
+//               SliverToBoxAdapter(
+//                 child: Padding(
+//                   padding: const EdgeInsets.only(left: 10),
+//                   child: Text(
+//                     'All Teachers',
+//                     style:  GoogleFonts.lato(
+//                  fontSize: 16,fontWeight: FontWeight.bold
+//                     )
+//                   ),
+//                 ),
+//               ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.only(left: 20.0, right: 20),
+              //     child: AllTeacherCard(
+              //         teacherName: 'Shalini Ray',
+              //         subject: 'Social Science',
+              //         imageUrl:
+              //             'https://media.istockphoto.com/id/1309328823/photo/headshot-portrait-of-smiling-male-employee-in-office.jpg?b=1&s=612x612&w=0&k=20&c=eU56mZTN4ZXYDJ2SR2DFcQahxEnIl3CiqpP3SOQVbbI='),
+              //   ),
+              // ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.only(left:10),
+              //     child: Text(
+              //       'Teachers Note',
+              //       style:  GoogleFonts.lato(
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //     ),
+              //   ),
+              // ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(10.0),
+              //     child: Padding(
+              //       padding: const EdgeInsets.all(8.0),
+              //       child: TeachersNoteCard(
+              //         teacherName: 'Neetu Kapoor',
+              //         subject: 'Science',
+              //         imageUrl:
+              //             'https://media.istockphoto.com/id/1309328823/photo/headshot-portrait-of-smiling-male-employee-in-office.jpg?b=1&s=612x612&w=0&k=20&c=eU56mZTN4ZXYDJ2SR2DFcQahxEnIl3CiqpP3SOQVbbI=',
+              //         description:
+              //             'Bring practical notebook to the class, we will conduct some experiments',
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.only(left: 10),
+              //     child:  Text(
+              //       'Courses Enrolled',
+              //       style:GoogleFonts.lato(
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //     ),
+              //   ),
+              // ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: SizedBox(
+              //     height: 280,
+              //     child: ListView.builder(
+              //       scrollDirection: Axis.horizontal,
+              //       itemCount: cardData.length,
+              //       itemBuilder: (context, index) {
+              //         final data = cardData[index];
+              //         return Padding(
+              //           padding: const EdgeInsets.symmetric(vertical: 8.0),
+              //           child: TwoColumnCard(
+              //             imagePath: data['imagePath'] ?? '',
+              //             title: data['title'] ?? '',
+              //             schoolName: data['schoolName'] ?? '',
+              //             progress: data['progress'] ?? '',
+              //           ),
+              //         );
+              //       },
+              //     ),
+              //   ),
+              // ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.only(left: 10),
+              //     child: Text(
+              //       'Similar Courses',
+              //       style: GoogleFonts.lato(
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //     ),
+              //   ),
+              // ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: SizedBox(
+              //     height: 280,
+              //     child: ListView.builder(
+              //       scrollDirection: Axis.horizontal,
+              //       itemCount: cardData.length,
+              //       itemBuilder: (context, index) {
+              //         final data = cardData[index];
+              //         return Padding(
+              //           padding: const EdgeInsets.symmetric(vertical: 8.0),
+              //           child: TwoColumnCard(
+              //             imagePath: data['imagePath'] ?? '',
+              //             title: data['title'] ?? '',
+              //             schoolName: data['schoolName'] ?? '',
+              //             progress: data['progress'] ?? '',
+              //           ),
+              //         );
+              //       },
+              //     ),
+              //   ),
+              // ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.only(left: 10),
+              //     child: Text(
+              //       'Attendance',
+              //       style: GoogleFonts.lato(
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //     ),
+              //   ),
+              // ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.all(18.0),
+              //     child: Container(
+              //       margin: EdgeInsets.fromLTRB(1, 0, 0, 24),
+              //       padding: EdgeInsets.fromLTRB(38, 28, 46.82, 24),
+              //       decoration: BoxDecoration(
+              //         color: const Color(0x1956e484),
+              //         borderRadius: BorderRadius.circular(24),
+              //       ),
+              //       child: Row(
+              //         crossAxisAlignment: CrossAxisAlignment.center,
+              //         children: [
+              //           Container(
+              //             margin: EdgeInsets.fromLTRB(0, 16, 31, 0),
+              //             child: Column(
+              //               crossAxisAlignment: CrossAxisAlignment.center,
+              //               children: [
+              //                 Center(
+              //                   child: Container(
+              //                     margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
+              //                     child: Text(
+              //                       'Present',
+              //                       textAlign: TextAlign.center,
+              //                       style:GoogleFonts.lato(
+              //    fontSize: 24,fontWeight: FontWeight.bold
+              //       )
+              //                     ),
+              //                   ),
+              //                 ),
+              //                 Container(
+              //                   margin: EdgeInsets.fromLTRB(1, 0, 0, 0),
+              //                   child: Text(
+              //                     'Today',
+              //                     style: GoogleFonts.lato(
+              //    fontSize: 12,fontWeight: FontWeight.bold
+              //       )
+              //                   ),
+              //                 ),
+              //               ],
+              //             ),
+              //           ),
+              //           Padding(
+              //             padding: const EdgeInsets.only(left: 70),
+              //             child: Container(
+              //               child: Column(children: [
+              //                 Text(
+              //                           '88%',
+              //                           textAlign: TextAlign.center,
+              //                           style: GoogleFonts.lato(
+              //    fontSize: 24,fontWeight: FontWeight.bold
+              //       )
+              //                         ),
+              //                         Padding(
+              //                           padding: const EdgeInsets.only(top: 10),
+              //                           child: Text(
+              //                                 'October',
+              //                                 textAlign: TextAlign.center,
+              //                                 style: GoogleFonts.lato(
+              //    fontSize: 12,fontWeight: FontWeight.bold
+              //       )
+              //                               ),
+              //                         ),
+              //               ],),
+              //             ),
+              //           )
+              //           // Container(
+
+              //           //   width: 130.68,
+              //           //   child: Column(
+              //           //     crossAxisAlignment: CrossAxisAlignment.center,
+              //           //     children: [
+              //           //       Center(
+              //           //         child: Container(
+              //           //           margin: EdgeInsets.fromLTRB(0.32, 0, 0, 20),
+              //           //           child: Text(
+              //           //             '88%',
+              //           //             textAlign: TextAlign.center,
+              //           //             style: TextStyle(
+              //           //               fontFamily: 'Poppins',
+              //           //               fontSize: 24,
+              //           //               fontWeight: FontWeight.w700,
+
+              //           //               color: Color(0xff707070),
+              //           //             ),
+              //           //           ),
+              //           //         ),
+              //           //       ),
+              //           //       // Container(
+              //           //       //   width: double.infinity,
+              //           //       //   child: Row(
+              //           //       //     crossAxisAlignment: CrossAxisAlignment.center,
+              //           //       //     children: [
+              //           //       //       Container(
+              //           //       //         margin: EdgeInsets.fromLTRB(55, 0, 11.5, 0),
+              //           //       //         child: Text(
+              //           //       //           'October',
+              //           //       //           textAlign: TextAlign.center,
+              //           //       //           style: TextStyle(
+              //           //       //             fontFamily: 'Lato',
+              //           //       //             fontSize: 12,
+              //           //       //             fontWeight: FontWeight.w400,
+              //           //       //             height: 1.3333333333,
+              //           //       //             color: const Color(0xff707070),
+              //           //       //           ),
+              //           //       //         ),
+              //           //       //       ),
+              //           //       //       // Container(
+              //           //       //       //   margin: EdgeInsets.fromLTRB(0, 4.59, 0, 0),
+              //           //       //       //   width: 7.18,
+              //           //       //       //   height: 4.59,
+              //           //       //       //   child: Image.asset(
+              //           //       //       //     'assets/images/vector-3TF.png',
+              //           //       //       //     width: 7.18,
+              // //           //       //       //     height: 4.59,
+              // //           //       //       //   ),
+              // //           //       //       // ),
+              // //           //       //     ],
+              // //           //       //   ),
+              // //           //       // ),
+              // //           //     ],
+              // //           //   ),
+              // //           // ),
+              // //         ],
+              // //       ),
+              // //     ),
+              // //   ),
+              // // ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: Padding(
+              //     padding: const EdgeInsets.only(left: 8.0),
+              //     child: Container(
+              //       child:  Text(
+              //         'Upcoming School Events',
+              //         style: GoogleFonts.lato(
+              //    fontSize: 16,fontWeight: FontWeight.bold
+              //       )
+              //       ),
+              //     ),
+              //   ),
+              // ),
+              // const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              // SliverToBoxAdapter(
+              //   child: CarouselSlider.builder(
+              //     carouselController: _controller,
+              //     itemCount: itemCount,
+              //     itemBuilder:
+              //         (BuildContext context, int itemIndex, int pageViewIndex) {
+              //       return Padding(
+              //         padding: const EdgeInsets.only(left: 18.0),
+              //         child: UpcomingEvent(
+              //           imagePaths: [
+              //             'assets/images/mask-group-hFF.png',
+              //           ],
+              //         ),
+              //       );
+              //     },
+              //     options: CarouselOptions(
+              //       enableInfiniteScroll: false,
+              //       viewportFraction: 1,
+              //       onPageChanged: (index, reason) {
+              //         setState(() {
+              //           currentPageTommorow = index;
+              //         });
+              //       },
+              //     ),
+              //   ),
+              // ),
+              // SliverToBoxAdapter(
+              //   child: Row(
+              //     mainAxisAlignment: MainAxisAlignment.center,
+              //     children: [
+              //       for (int i = 0; i < itemCount; i++)
+              //         Container(
+              //           width: 8.0,
+              //           height: 8.0,
+              //           margin: const EdgeInsets.symmetric(
+              //               vertical: 10, horizontal: 2),
+              //           decoration: BoxDecoration(
+              //             shape: BoxShape.circle,
+              //             color: currentPageTommorow == i
+              //                 ? AppColors.black
+              //                 : AppColors.lightGrey,
+              //           ),
+              //         ),
+              //     ],
+              //   ),
+              // ),
               SliverToBoxAdapter(
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(10, 0, 16, 0),
-                  width: double.infinity,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 2, right: 2),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        margin: EdgeInsets.fromLTRB(0, 0.78, 262, 0),
-                        child: const Text(
-                          'Her Classes',
-                          style: TextStyle(
-                            fontFamily: 'Lato',
-                            fontSize: 16,
-                            decoration: TextDecoration.none,
-                            fontWeight: FontWeight.w700,
-                            height: 1,
-                            color: Color(0xff383838),
-                          ),
-                        ),
-                      ),
-                      Opacity(
-                        opacity: 0.7,
-                        child: SizedBox(
-                          width: 30, // Set your custom width here
-                          height: 30, // Set your custom height here
-                          child: Image.asset(
-                            'assets/images/group-3855.png',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: CarouselSlider.builder(
-                  carouselController: _controller,
-                  itemCount: lessonData
-                      .length, // Use the length of your lessonData list
-                  itemBuilder:
-                      (BuildContext context, int itemIndex, int pageViewIndex) {
-                    final lesson = lessonData[
-                        itemIndex]; // Get the lesson data for the current index
-                    return LessonCard(
-                      title: lesson['title'] ?? '',
-                      subtitle: lesson['subtitle'] ?? '',
-                      teacherName: lesson['teacherName'] ?? '',
-                      imageAsset: lesson['imageAsset'] ?? '',
-                      iconAsset: lesson['iconAsset'] ?? '',
-                    );
-                  },
-                  options: CarouselOptions(
-                    enableInfiniteScroll: false,
-                    viewportFraction: 1,
-                    onPageChanged: (index, reason) {
-                      setState(() {
-                        currentPageToday = index;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for (int i = 0; i < itemCount; i++)
-                      Container(
-                        width: 8.0,
-                        height: 8.0,
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 2),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: currentPageToday == i
-                              ? AppColors.black
-                              : AppColors.lightGrey,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: EdgeInsets.fromLTRB(10, 0.78, 232, 0),
-                  child: Text(
-                    'Her Classe Teacher',
-                    style: TextStyle(
-                      fontFamily: 'Lato',
-                      fontSize: 16,
-                      decoration: TextDecoration.none,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                      color: Color(0xff383838),
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20.0, right: 20),
-                  child: TeacherInfoCard(
-                      teacherName: 'Shalini Ray',
-                      subject: 'Social Science',
-                      imageUrl:
-                          'https://media.istockphoto.com/id/1309328823/photo/headshot-portrait-of-smiling-male-employee-in-office.jpg?b=1&s=612x612&w=0&k=20&c=eU56mZTN4ZXYDJ2SR2DFcQahxEnIl3CiqpP3SOQVbbI='),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: EdgeInsets.fromLTRB(10, 0.78, 280, 0),
-                  child: Text(
-                    'All Teachers',
-                    style: TextStyle(
-                      fontFamily: 'Lato',
-                      fontSize: 16,
-                      decoration: TextDecoration.none,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                      color: Color(0xff383838),
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 20.0, right: 20),
-                  child: AllTeacherCard(
-                      teacherName: 'Shalini Ray',
-                      subject: 'Social Science',
-                      imageUrl:
-                          'https://media.istockphoto.com/id/1309328823/photo/headshot-portrait-of-smiling-male-employee-in-office.jpg?b=1&s=612x612&w=0&k=20&c=eU56mZTN4ZXYDJ2SR2DFcQahxEnIl3CiqpP3SOQVbbI='),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: EdgeInsets.fromLTRB(10, 0.78, 280, 0),
-                  child: Text(
-                    'Teachers Note',
-                    style: TextStyle(
-                      fontFamily: 'Lato',
-                      fontSize: 16,
-                      decoration: TextDecoration.none,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                      color: Color(0xff383838),
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: TeachersNoteCard(
-                      teacherName: 'Neetu Kapoor',
-                      subject: 'Science',
-                      imageUrl:
-                          'https://media.istockphoto.com/id/1309328823/photo/headshot-portrait-of-smiling-male-employee-in-office.jpg?b=1&s=612x612&w=0&k=20&c=eU56mZTN4ZXYDJ2SR2DFcQahxEnIl3CiqpP3SOQVbbI=',
-                      description:
-                          'Bring practical notebook to the class, we will conduct some experiments',
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(10, 0.78, 250, 0),
-                  child: const Text(
-                    'Courses Enrolled',
-                    style: TextStyle(
-                      fontFamily: 'Lato',
-                      fontSize: 16,
-                      decoration: TextDecoration.none,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                      color: Color(0xff383838),
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 280,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: cardData.length,
-                    itemBuilder: (context, index) {
-                      final data = cardData[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: TwoColumnCard(
-                          imagePath: data['imagePath'] ?? '',
-                          title: data['title'] ?? '',
-                          schoolName: data['schoolName'] ?? '',
-                          progress: data['progress'] ?? '',
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: EdgeInsets.fromLTRB(10, 0.78, 250, 0),
-                  child: Text(
-                    'Similar Courses',
-                    style: TextStyle(
-                      fontFamily: 'Lato',
-                      fontSize: 16,
-                      decoration: TextDecoration.none,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                      color: Color(0xff383838),
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 280,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: cardData.length,
-                    itemBuilder: (context, index) {
-                      final data = cardData[index];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0),
-                        child: TwoColumnCard(
-                          imagePath: data['imagePath'] ?? '',
-                          title: data['title'] ?? '',
-                          schoolName: data['schoolName'] ?? '',
-                          progress: data['progress'] ?? '',
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: Container(
-                  margin: const EdgeInsets.fromLTRB(10, 0.78, 290, 0),
-                  child: const Text(
-                    'Attendance',
-                    style: TextStyle(
-                      fontFamily: 'Lato',
-                      fontSize: 16,
-                      decoration: TextDecoration.none,
-                      fontWeight: FontWeight.w700,
-                      height: 1,
-                      color: Color(0xff383838),
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(18.0),
-                  child: Container(
-                    margin: EdgeInsets.fromLTRB(1, 0, 0, 24),
-                    padding: EdgeInsets.fromLTRB(38, 28, 46.82, 24),
-                    decoration: BoxDecoration(
-                      color: const Color(0x1956e484),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          margin: EdgeInsets.fromLTRB(0, 16, 31, 0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Center(
-                                child: Container(
-                                  margin: EdgeInsets.fromLTRB(0, 0, 0, 20),
-                                  child: Text(
-                                    'Present',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w700,
-                                      height: 0.6666666667,
-                                      color: const Color(0xff707070),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.fromLTRB(1, 0, 0, 0),
-                                child: Text(
-                                  'Today',
-                                  style: TextStyle(
-                                    fontFamily: 'Lato',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w400,
-                                    height: 1.3333333333,
-                                    color: Color(0xff707070),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          margin: EdgeInsets.fromLTRB(0, 16, 0, 0),
-                          width: 155.68,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Center(
-                                child: Container(
-                                  margin: EdgeInsets.fromLTRB(0.32, 0, 0, 20),
-                                  child: Text(
-                                    '88%',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.w700,
-                                      height: 0.6666666667,
-                                      color: Color(0xff707070),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Container(
-                                width: double.infinity,
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      margin:
-                                          EdgeInsets.fromLTRB(55, 0, 11.5, 0),
-                                      child: Text(
-                                        'October',
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                          fontFamily: 'Lato',
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w400,
-                                          height: 1.3333333333,
-                                          color: const Color(0xff707070),
-                                        ),
-                                      ),
-                                    ),
-                                    Container(
-                                      margin:
-                                          EdgeInsets.fromLTRB(0, 4.59, 0, 0),
-                                      width: 7.18,
-                                      height: 4.59,
-                                      child: Image.asset(
-                                        'assets/images/vector-3TF.png',
-                                        width: 7.18,
-                                        height: 4.59,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Container(
-                    child: const Text(
-                      'Upcoming School Events',
-                      style: TextStyle(
-                        fontFamily: 'Lato',
-                        fontSize: 16,
-                        decoration: TextDecoration.none,
-                        fontWeight: FontWeight.w700,
-                        height: 1,
-                        color: Color(0xff383838),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 20)),
-              SliverToBoxAdapter(
-                child: CarouselSlider.builder(
-                  carouselController: _controller,
-                  itemCount: itemCount,
-                  itemBuilder:
-                      (BuildContext context, int itemIndex, int pageViewIndex) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 18.0),
-                      child: UpcomingEvent(
-                        imagePaths: [
-                          'assets/images/mask-group-hFF.png',
-                        ],
-                      ),
-                    );
-                  },
-                  options: CarouselOptions(
-                    enableInfiniteScroll: false,
-                    viewportFraction: 1,
-                    onPageChanged: (index, reason) {
-                      setState(() {
-                        currentPageTommorow = index;
-                      });
-                    },
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    for (int i = 0; i < itemCount; i++)
-                      Container(
-                        width: 8.0,
-                        height: 8.0,
-                        margin: const EdgeInsets.symmetric(
-                            vertical: 10, horizontal: 2),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: currentPageTommorow == i
-                              ? AppColors.black
-                              : AppColors.lightGrey,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0, right: 5),
-                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       CustomCard(
-                        imagePath: 'assets/images/thumbtack-solid.png',
+                        imagePath: 'assets/leave_request.png',
                         title: 'Leave request',
                       ),
                       CustomCard(
-                        imagePath: 'assets/images/thumbtack-solid.png',
-                        title: 'Leave request',
+                        imagePath: 'assets/pic3.png',
+                        title: 'Attendance',
                       ),
                     ],
                   ),
@@ -885,16 +870,18 @@ class _ParentHomePageState extends State<ParentHomePage> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0, right: 5),
+                  padding: const EdgeInsets.only(left: 2, right: 2),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       CustomCard(
                         imagePath: 'assets/images/thumbtack-solid.png',
-                        title: 'Leave request',
+                        title: 'Notices',
                       ),
                       CustomCard(
-                        imagePath: 'assets/images/thumbtack-solid.png',
-                        title: 'Leave request',
+                        imagePath: 'assets/Events_pic.png',
+                        title: 'Events',
                       ),
                     ],
                   ),
@@ -902,16 +889,18 @@ class _ParentHomePageState extends State<ParentHomePage> {
               ),
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0, right: 5),
+                  padding: const EdgeInsets.only(left: 2, right: 2),
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       CustomCard(
-                        imagePath: 'assets/images/thumbtack-solid.png',
-                        title: 'Leave request',
+                        imagePath: 'assets/fee_payment.png',
+                        title: 'Fee payment',
                       ),
                       CustomCard(
-                        imagePath: 'assets/images/thumbtack-solid.png',
-                        title: 'Leave request',
+                        imagePath: 'assets/about.png',
+                        title: 'About School',
                       ),
                     ],
                   ),

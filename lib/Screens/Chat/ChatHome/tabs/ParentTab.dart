@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -9,13 +8,10 @@ import 'package:schoolpenintern/Providers/models/StudentProfilemodels.dart';
 import 'package:schoolpenintern/Providers/models/TeacherProfilemodels.dart';
 import 'package:schoolpenintern/Screens/Chat/ChatMessage/ChatMessageScreen.dart';
 import 'package:schoolpenintern/Screens/Chat/ChatMessage/bloc/chat_message_bloc.dart';
-import 'package:schoolpenintern/Screens/Chat/models/userSearchmodel.dart';
 import 'package:http/http.dart' as http;
 import 'package:schoolpenintern/data/Network/config.dart';
-import 'package:schoolpenintern/data/model/StudentProfileModel.dart';
 import '../../../../Theme/Colors/appcolors.dart';
-import 'package:socket_io_client/socket_io_client.dart' as io;
-
+import '../../../../utiles/LoadImage.dart';
 import '../../../../utiles/TimeToDays.dart';
 
 // ignore: must_be_immutable
@@ -46,7 +42,7 @@ class ParentTabState extends State<ParentTab> {
         Provider.of<UserProfileProvider>(context, listen: false);
 
     var url = Uri.parse(
-        'http://192.168.33.88:7000/last_message/${userdata.userid}/${id}');
+        '${Config.chatserverUrl}/last_message/${userdata.userid}/$id');
     print(url);
     var req = http.MultipartRequest('GET', url);
     var res = await req.send();
@@ -81,13 +77,13 @@ class ParentTabState extends State<ParentTab> {
       TeacherProfileModel userData =
           TeacherProfileModel.fromJson(widget.chatuserId);
       image = userData.userImage!;
-      userid = userData.profile!.useridnamePassword!.useridName!;
+      userid = userData.profile!.useridnamePassword!.useridName.toString();
       name = userData.username!;
       roal = "teacher";
       getLastMessage(userid);
     } else if (widget.chatuserId!['role'] == 'parent') {
-      ParentProfileModel userData =
-          ParentProfileModel.fromJson(widget.chatuserId);
+      ParentProfileDataModel userData =
+          ParentProfileDataModel.fromJson(widget.chatuserId);
       image = userData.parentImage!;
       userid = userData.parentUseridname!;
       name = userData.parentName!;
@@ -107,8 +103,6 @@ class ParentTabState extends State<ParentTab> {
         Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) {
-              print("/////////////////////////////");
-              print(widget.chatuserId);
               return BlocProvider(
                 create: (context) => ChatMessageBloc(),
                 child: ChatMessageScreen(
@@ -116,7 +110,7 @@ class ParentTabState extends State<ParentTab> {
                   chatuserid: userid,
                   name: name,
                   roal: roal,
-                  image: image,
+                  image: loadImage(image, roal),
                   chatusernameid: userid,
                 ),
               );
@@ -135,7 +129,7 @@ class ParentTabState extends State<ParentTab> {
             borderRadius: BorderRadius.circular(50),
           ),
           child: Image.network(
-            "${Config.hostUrl}/static/${image}",
+            loadImage(image, roal),
             height: 50,
             width: 50,
             fit: BoxFit.cover,
@@ -153,7 +147,7 @@ class ParentTabState extends State<ParentTab> {
                 fontWeight: FontWeight.bold,
                 fontSize: 14),
           ),
-          Text(" | ${roal}",
+          Text(" | $roal",
               style: TextStyle(color: AppColors.graymdm, fontSize: 14)),
         ],
       ),

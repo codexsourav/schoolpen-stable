@@ -11,7 +11,7 @@ class ChatUserProvider extends ChangeNotifier {
   List? teacher;
   List? parent;
 
-  List? _allusers;
+  List _allusers = [];
   bool loading = false;
 
   setChatUsers(id) async {
@@ -29,7 +29,6 @@ class ChatUserProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       print(e);
-      listchatUsers = [];
       _allusers = [];
       loading = false;
       notifyListeners();

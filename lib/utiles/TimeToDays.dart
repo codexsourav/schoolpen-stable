@@ -1,4 +1,5 @@
 String? changeTimeToDayOrHour(String? date) {
+  print("=======================================");
   print(date);
   if (date != null) {
     DateTime? parsedDate = DateTime.tryParse(date);

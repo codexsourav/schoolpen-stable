@@ -30,11 +30,11 @@ class UserParentsBox extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
-            padding: EdgeInsets.only(top: 20, left: 20, bottom: 20),
+          Padding(
+            padding: const EdgeInsets.only(top: 20, left: 20, bottom: 20),
             child: Text(
-              "Parent`s Details",
-              style: TextStyle(
+              title,
+              style: const TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
                 fontSize: 20,

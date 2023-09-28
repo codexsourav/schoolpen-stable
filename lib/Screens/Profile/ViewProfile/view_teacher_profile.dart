@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
-import 'package:schoolpenintern/Screens/Chat/ChatHome/ChatHomeScreen.dart';
+import 'package:schoolpenintern/Screens/Chat/ChatHome/NewChatHome.dart';
+
 import 'package:schoolpenintern/Screens/Profile/ViewProfile/Constents.dart';
 import 'package:schoolpenintern/data/Network/config.dart';
 
@@ -56,7 +57,7 @@ class ViewTeacherProfile extends StatelessWidget {
                             buttonColor: viewProfileTabs[roal]['darkcolor'],
                             onCall: () {},
                             onMessage: () {
-                              Get.to(() => ChatHomeScreen(
+                              Get.to(() => NewChatHome(
                                     role: "teacher",
                                     myid: userdata.dbid.toString(),
                                     myuserid: userdata.userid.toString(),
@@ -99,20 +100,20 @@ class ViewTeacherProfile extends StatelessWidget {
                               ),
                               const SizedBox(height: 20),
                               // Status Card Here ==============
-                              StatusCard(
-                                  bgcolor: viewProfileTabs[roal]['bgcolor'],
-                                  headline: userdata.teacherdata!.profile!
-                                      .status!.userDesignation
-                                      .toString(),
-                                  description: userdata.teacherdata!.profile!
-                                      .status!.userDesignation
-                                      .toString()),
+                              // StatusCard(
+                              //     bgcolor: viewProfileTabs[roal]['bgcolor'],
+                              //     headline: userdata.teacherdata!.profile!
+                              //         .status!.userDesignation
+                              //         .toString(),
+                              //     description: userdata.teacherdata!.profile!
+                              //         .status!.userDesignation
+                              //         .toString()),
                               const SizedBox(height: 20),
                               // About Card Here ==============
                               AboutCard(
                                 bgcolor: viewProfileTabs[roal]['bgcolor'],
-                                description: userdata
-                                    .teacherdata!.profile!.about
+                                description: userdata.teacherdata!.profile!
+                                    .useridnamePassword!.useridName
                                     .toString(),
                               )
                             ],
@@ -130,17 +131,17 @@ class ViewTeacherProfile extends StatelessWidget {
                           ),
                           const SizedBox(height: 20),
                           // User Contact Card Here ==============
-                          UserConatctBox(
-                            backgroundColor: viewProfileTabs[roal]['bgcolor'],
-                            onEditClick: () {},
-                            emailText: userdata
-                                .teacherdata!.profile!.contact!.email
-                                .toString(),
-                            phoneText: "+91 " +
-                                userdata.teacherdata!.profile!.contact!.phone
-                                    .toString(),
-                            locationAddress: "Just Show",
-                          ),
+                          // UserConatctBox(
+                          //   backgroundColor: viewProfileTabs[roal]['bgcolor'],
+                          //   onEditClick: () {},
+                          //   emailText: userdata
+                          //       .teacherdata!.profile!.contact!.email
+                          //       .toString(),
+                          //   phoneText: "+91 " +
+                          //       userdata.teacherdata!.profile!.contact!.phone
+                          //           .toString(),
+                          //   locationAddress: "Just Show",
+                          // ),
                           const SizedBox(height: 20),
 
                           // Parent Card Here ==============

@@ -257,10 +257,12 @@ def login():
 @app.route("/last_message/<sender>/<recipient>", methods=['GET', 'POST'])
 def last_message_function(sender, recipient):
 
-    message = get_message(sender, recipient)
-    if message:
-        print("MESSAGE:", message)
-        return jsonify(message)
+    messages = get_message(sender, recipient)
+
+    if messages:
+        messages['created_at'] = messages['created_at'].isoformat()
+        print("MESSAGE:", messages)
+        return jsonify(messages)
     else:
         return jsonify({'msg': 'No msg were found!!'})
 

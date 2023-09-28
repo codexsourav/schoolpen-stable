@@ -6,9 +6,10 @@ import 'package:provider/provider.dart';
 import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
 import 'package:schoolpenintern/Screens/Student/student_homepage_widgets/appbar_icon_widget.dart';
 import '../../../data/Network/config.dart';
-import 'package:schoolpenintern/Screens/Chat/ChatHome/ChatHomeScreen.dart';
 
+import '../../../utiles/LoadImage.dart';
 import '../../Profile/ViewProfile/view_student_profile.dart';
+import '../../Profile/ViewUserProfile.dart';
 
 class HeaderWidget extends StatelessWidget {
   final String role;
@@ -77,13 +78,20 @@ class HeaderWidget extends StatelessWidget {
                         },
                         child: GestureDetector(
                           onTap: () {
-                            Get.to(() => ViewStudentProfile());
+                            Get.to(() => ViewUserProfile(
+                                  role: 'student',
+                                  userid: Provider.of<UserProfileProvider>(
+                                          context,
+                                          listen: false)
+                                      .userid
+                                      .toString(),
+                                ));
                           },
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(50),
                             child: Image.network(
-                              // "https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D&w=1000&q=80",
-                              "https://m.media-amazon.com/images/I/41EvGpCFECL._AC_UF1000,1000_QL80_.jpg",
+                              loadImage(
+                                  getdata.profileData!.userImage, "student"),
                               width: 50,
                               height: 50,
                               fit: BoxFit.cover,
@@ -111,7 +119,7 @@ class HeaderWidget extends StatelessWidget {
                                 Text(
                                   // "",
                                   // "${data.profileData!.username}",
-                                  "${getdata.userid}",
+                                  "${getdata.profileData!.username}",
                                   style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.w700),

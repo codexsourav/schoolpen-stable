@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
 import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
-import 'package:schoolpenintern/Screens/Chat/ChatHome/ChatHomeScreen.dart';
+
 import 'package:schoolpenintern/Screens/Profile/ViewProfile/Constents.dart';
 import 'package:schoolpenintern/data/Network/config.dart';
 
@@ -18,6 +18,7 @@ import '../../../Components/Sourav_widgets/student_parent_box.dart';
 import '../../../Components/Sourav_widgets/user_contact_info_box.dart';
 import '../../../Components/Sourav_widgets/user_idinfo_box.dart';
 import '../../../Components/Vishwajeet_widgets/profile_card.dart';
+import '../../Chat/ChatHome/NewChatHome.dart';
 
 class ViewStudentProfile extends StatelessWidget {
   ViewStudentProfile({super.key});
@@ -57,7 +58,7 @@ class ViewStudentProfile extends StatelessWidget {
                         buttonColor: viewProfileTabs[roal]['darkcolor'],
                         onCall: () {},
                         onMessage: () {
-                          Get.to(() => ChatHomeScreen(
+                          Get.to(() => NewChatHome(
                                 role: "student",
                                 myuserid: userdata.userid.toString(),
                                 image:

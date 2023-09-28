@@ -50,16 +50,16 @@ class AddStudentStepOneState extends State<AddStudentStepOne> {
   TextEditingController email = TextEditingController();
   TextEditingController address = TextEditingController();
   TextEditingController area = TextEditingController();
-  TextEditingController Pincode = TextEditingController();
-    TextEditingController city = TextEditingController();
-  TextEditingController state= TextEditingController();
+  TextEditingController pincode = TextEditingController();
+  TextEditingController city = TextEditingController();
+  TextEditingController state = TextEditingController();
 
   checkvalidate() {
     AddUsersProvider dataProvider =
         Provider.of<AddUsersProvider>(context, listen: false);
     dataProvider.setData(
       getarea: area.text,
-      getpincode: Pincode.text,
+      getpincode: pincode.text,
       getcity: city.text,
       getstate: state.text,
       gtefullname: name.text,
@@ -202,7 +202,7 @@ class AddStudentStepOneState extends State<AddStudentStepOne> {
                         hintText: "Your Email Address",
                       ),
                       MultiTextInputField(
-                       color: Color(0XFFf9f2fe),
+                        color: Color(0XFFf9f2fe),
                         isNumbered: false,
                         controller1: area,
                         controller2: city,
@@ -210,11 +210,11 @@ class AddStudentStepOneState extends State<AddStudentStepOne> {
                         hinttext2: "City",
                         title: "Address line 1",
                       ),
-                        MultiTextInputField(
-                          color: Color(0XFFf9f2fe),
-                          isNumbered: true,
+                      MultiTextInputField(
+                        color: Color(0XFFf9f2fe),
+                        isNumbered: true,
                         controller1: state,
-                        controller2: Pincode,
+                        controller2: pincode,
                         hinttext1: "State",
                         hinttext2: "Pincode",
                         title: "Address line 2",

@@ -5,7 +5,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:schoolpenintern/Screens/Profile/ViewProfile/view_parent_profile.dart';
-import 'package:schoolpenintern/Screens/Teacher/home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../Providers/UserProfileProvider.dart';
@@ -36,6 +35,7 @@ class ProfileController extends GetxController {
         print(response.data);
         print(signupModel.fromJson(response.data).message);
         print(signupModel.fromJson(response.data).userId);
+        print(response.data);
         return signupModel.fromJson(response.data);
         // print(response.data);
         // print(signupModel.fromJson(response.data).message);

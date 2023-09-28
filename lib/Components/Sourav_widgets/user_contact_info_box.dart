@@ -9,6 +9,7 @@ class UserConatctBox extends StatelessWidget {
   final String emailText;
   final String locationAddress;
   final String headingText;
+  final bool isedit;
   final void Function()? onEditClick;
 
   const UserConatctBox({
@@ -19,6 +20,7 @@ class UserConatctBox extends StatelessWidget {
     this.locationAddress = "Password",
     this.headingText = "Contact",
     required this.onEditClick,
+    this.isedit = false,
   });
 
   @override
@@ -42,15 +44,17 @@ class UserConatctBox extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     fontSize: 20),
               ),
-              IconButton(
-                padding: const EdgeInsets.all(0),
-                highlightColor: Colors.transparent,
-                focusColor: Colors.transparent,
-                hoverColor: Colors.transparent,
-                splashColor: Colors.transparent,
-                onPressed: onEditClick,
-                icon: const Icon(Icons.edit_square),
-              ),
+              isedit
+                  ? IconButton(
+                      padding: const EdgeInsets.all(0),
+                      highlightColor: Colors.transparent,
+                      focusColor: Colors.transparent,
+                      hoverColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      onPressed: onEditClick,
+                      icon: const Icon(Icons.edit_square),
+                    )
+                  : const SizedBox(),
             ],
           ),
           Column(

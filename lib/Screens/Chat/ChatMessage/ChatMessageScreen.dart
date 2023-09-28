@@ -11,6 +11,7 @@ import 'package:schoolpenintern/Screens/Profile/ViewUserProfile.dart';
 import 'package:schoolpenintern/Theme/Colors/appcolors.dart';
 import 'package:schoolpenintern/data/Network/config.dart';
 import 'package:schoolpenintern/utiles/TimeToDays.dart';
+import '../../SearchUser/SearchUsers.dart';
 import '../Components/ChatAppbar.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 import 'package:http/http.dart' as http;
@@ -38,7 +39,7 @@ class ChatMessageScreen extends StatefulWidget {
 }
 
 class _ChatMessageScreenState extends State<ChatMessageScreen> {
-  late io.Socket socket;
+  io.Socket? socket;
   late String username;
   late String resiver;
   List chatsData = [];
@@ -55,25 +56,27 @@ class _ChatMessageScreenState extends State<ChatMessageScreen> {
     username = widget.myid.toString();
     resiver = widget.chatusernameid.toString();
     print("====================>${widget.chatusernameid} ${widget.myid}");
-    String serverUrl = 'http://192.168.33.88:7000';
+    String serverUrl = Config.chatserverUrl;
     socket = io.io(serverUrl, <String, dynamic>{
       'transports': ['websocket'],
     });
 
-    socket.onConnect((data) {
+    socket!.onConnect((data) {
       Map user = {"sender": username, "recipient": resiver};
-      socket.emit('initConnect', user);
+      socket!.emit('initConnect', user);
     });
+    if (socket!.connected) {
+      socket!.disconnect();
+    }
+    socket!.connect();
 
-    socket.connect();
-
-    socket.on('getoldmessage', (data) {
+    socket!.on('getoldmessage', (data) {
       chatsData = data['messages'];
 
       chat.emit(ChatMessageShow(message: chatsData));
     });
 
-    socket.on("new_private_message", (data) {
+    socket!.on("new_private_message", (data) {
       chatsData.add({
         "sender": data['sender'],
         "recipient": data['resiver'],
@@ -87,7 +90,7 @@ class _ChatMessageScreenState extends State<ChatMessageScreen> {
       _scrollToBottom();
     });
 
-    socket.on('nouserfound', (data) {
+    socket!.on('nouserfound', (data) {
       Fluttertoast.showToast(msg: "No User Found!");
       Navigator.of(context).pop();
     });
@@ -96,7 +99,7 @@ class _ChatMessageScreenState extends State<ChatMessageScreen> {
   }
 
   onSendMessage() {
-    socket.emit("private_message", {
+    socket!.emit("private_message", {
       "sender": username,
       "recipient": resiver,
       "message": _textEditingController.text
@@ -126,7 +129,7 @@ class _ChatMessageScreenState extends State<ChatMessageScreen> {
   Future blockUser() async {
     try {
       http.Response data = await http.get(
-          Uri.parse("http://192.168.33.88:7000/block_user/$username/$resiver"));
+          Uri.parse("${Config.chatserverUrl}/block_user/$username/$resiver"));
       var resdata = jsonDecode(data.body);
       print(resdata);
       Fluttertoast.showToast(msg: "User Blocked");
@@ -138,8 +141,8 @@ class _ChatMessageScreenState extends State<ChatMessageScreen> {
 
   Future unblockUser() async {
     try {
-      http.Response data = await http.post(Uri.parse(
-          "http://192.168.33.88:7000/unblock_user/$username/$resiver"));
+      http.Response data = await http.post(
+          Uri.parse("${Config.chatserverUrl}/unblock_user/$username/$resiver"));
       var resdata = jsonDecode(data.body);
       Fluttertoast.showToast(msg: "User UnBlock");
     } catch (e) {
@@ -154,7 +157,7 @@ class _ChatMessageScreenState extends State<ChatMessageScreen> {
     } else if (e == "unblock") {
       await unblockUser();
     } else if (e == "profile") {
-      Get.to(ViewUserProfile(userid: widget.chatusernameid, role: widget.roal));
+      Get.to(SearchUserProfile(userid: widget.chatuserid));
     } else {
       Fluttertoast.showToast(msg: "This Option Is Coming Soon");
     }
@@ -163,7 +166,7 @@ class _ChatMessageScreenState extends State<ChatMessageScreen> {
 
   @override
   void dispose() {
-    socket.dispose();
+    socket!.dispose();
     super.dispose();
   }
 
@@ -172,9 +175,9 @@ class _ChatMessageScreenState extends State<ChatMessageScreen> {
     return Scaffold(
       appBar: chatAppbar(
         context,
-        name: widget.name,
+        name: widget.chatusernameid,
         typename: widget.roal,
-        title: widget.name,
+        title: widget.chatusernameid,
         image: widget.image,
         id: widget.chatuserid,
         onMenuselect: onselect,

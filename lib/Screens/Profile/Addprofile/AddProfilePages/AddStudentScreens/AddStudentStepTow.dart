@@ -108,6 +108,9 @@ class AddTeacherStepTowState extends State<AddStudentStpeTow> {
                   inputfillColor: secColor,
                   title: "School Key",
                   hintText: "Key/code",
+                  validate: (e) {
+                    return null;
+                  },
                 ),
               ),
               SelectOptionDropDown(

@@ -1,165 +1,162 @@
 class TeacherProfileModel {
-  String? sId;
-  String? username;
+  String? dob;
+  String? gender;
   String? languages;
-  String? userImage;
-  String? role;
   Profile? profile;
+  String? userImage;
+  String? username;
 
   TeacherProfileModel(
-      {this.sId,
-      this.username,
+      {this.dob,
+      this.gender,
       this.languages,
+      this.profile,
       this.userImage,
-      this.role,
-      this.profile});
+      this.username});
 
   TeacherProfileModel.fromJson(Map<String, dynamic> json) {
-    sId = json['_id'];
-    username = json['username'];
+    dob = json['dob'];
+    gender = json['gender'];
     languages = json['languages'];
-    userImage = json['user_image'];
-    role = json['role'];
     profile =
         json['profile'] != null ? new Profile.fromJson(json['profile']) : null;
+    userImage = json['user_image'];
+    username = json['username'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['_id'] = this.sId;
-    data['username'] = this.username;
+    data['dob'] = this.dob;
+    data['gender'] = this.gender;
     data['languages'] = this.languages;
-    data['user_image'] = this.userImage;
-    data['role'] = this.role;
     if (this.profile != null) {
       data['profile'] = this.profile!.toJson();
     }
+    data['user_image'] = this.userImage;
+    data['username'] = this.username;
     return data;
   }
 }
 
 class Profile {
-  Status? status;
   String? about;
-  UseridnamePassword? useridnamePassword;
   Contact? contact;
+  Status? status;
+  UseridnamePassword? useridnamePassword;
 
-  Profile({this.status, this.about, this.useridnamePassword, this.contact});
+  Profile({this.about, this.contact, this.status, this.useridnamePassword});
 
   Profile.fromJson(Map<String, dynamic> json) {
+    about = json['about'];
+    contact =
+        json['contact'] != null ? new Contact.fromJson(json['contact']) : null;
     status =
         json['status'] != null ? new Status.fromJson(json['status']) : null;
-    about = json['about'];
     useridnamePassword = json['useridname_password'] != null
         ? new UseridnamePassword.fromJson(json['useridname_password'])
         : null;
-    contact =
-        json['contact'] != null ? new Contact.fromJson(json['contact']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['about'] = this.about;
+    if (this.contact != null) {
+      data['contact'] = this.contact!.toJson();
+    }
     if (this.status != null) {
       data['status'] = this.status!.toJson();
     }
-    data['about'] = this.about;
     if (this.useridnamePassword != null) {
       data['useridname_password'] = this.useridnamePassword!.toJson();
-    }
-    if (this.contact != null) {
-      data['contact'] = this.contact!.toJson();
     }
     return data;
   }
 }
 
-class Status {
-  String? userDesignation;
-  String? userDescription;
+class Contact {
+  Address? address;
+  String? email;
+  String? phone;
 
-  Status({this.userDesignation, this.userDescription});
+  Contact({this.address, this.email, this.phone});
 
-  Status.fromJson(Map<String, dynamic> json) {
-    userDesignation = json['user_designation'];
-    userDescription = json['user_description'];
+  Contact.fromJson(Map<String, dynamic> json) {
+    address =
+        json['address'] != null ? new Address.fromJson(json['address']) : null;
+    email = json['email'];
+    phone = json['phone'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['user_designation'] = this.userDesignation;
+    if (this.address != null) {
+      data['address'] = this.address!.toJson();
+    }
+    data['email'] = this.email;
+    data['phone'] = this.phone;
+    return data;
+  }
+}
+
+class Address {
+  String? city;
+  String? houseNo;
+  String? postalCode;
+  String? state;
+  String? street;
+
+  Address({this.city, this.houseNo, this.postalCode, this.state, this.street});
+
+  Address.fromJson(Map<String, dynamic> json) {
+    city = json['city'];
+    houseNo = json['house_no'];
+    postalCode = json['postal_code'];
+    state = json['state'];
+    street = json['street'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['city'] = this.city;
+    data['house_no'] = this.houseNo;
+    data['postal_code'] = this.postalCode;
+    data['state'] = this.state;
+    data['street'] = this.street;
+    return data;
+  }
+}
+
+class Status {
+  String? userDescription;
+  String? userDesignation;
+
+  Status({this.userDescription, this.userDesignation});
+
+  Status.fromJson(Map<String, dynamic> json) {
+    userDescription = json['user_description'];
+    userDesignation = json['user_designation'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
     data['user_description'] = this.userDescription;
+    data['user_designation'] = this.userDesignation;
     return data;
   }
 }
 
 class UseridnamePassword {
   String? useridName;
-  String? password;
 
-  UseridnamePassword({this.useridName, this.password});
+  UseridnamePassword({this.useridName});
 
   UseridnamePassword.fromJson(Map<String, dynamic> json) {
     useridName = json['userid_name'];
-    password = json['password'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['userid_name'] = this.useridName;
-    data['password'] = this.password;
-    return data;
-  }
-}
-
-class Contact {
-  String? phone;
-  String? email;
-  Address? address;
-
-  Contact({this.phone, this.email, this.address});
-
-  Contact.fromJson(Map<String, dynamic> json) {
-    phone = json['phone'];
-    email = json['email'];
-    address =
-        json['address'] != null ? new Address.fromJson(json['address']) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['phone'] = this.phone;
-    data['email'] = this.email;
-    if (this.address != null) {
-      data['address'] = this.address!.toJson();
-    }
-    return data;
-  }
-}
-
-class Address {
-  String? houseNo;
-  String? street;
-  String? postalCode;
-  String? city;
-  String? state;
-
-  Address({this.houseNo, this.street, this.postalCode, this.city, this.state});
-
-  Address.fromJson(Map<String, dynamic> json) {
-    houseNo = json['house_no'];
-    street = json['street'];
-    postalCode = json['postal_code'];
-    city = json['city'];
-    state = json['state'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['house_no'] = this.houseNo;
-    data['street'] = this.street;
-    data['postal_code'] = this.postalCode;
-    data['city'] = this.city;
-    data['state'] = this.state;
     return data;
   }
 }

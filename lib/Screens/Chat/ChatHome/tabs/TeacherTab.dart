@@ -6,17 +6,18 @@ import 'package:provider/provider.dart';
 import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
 import 'package:schoolpenintern/Providers/models/ParentProfilemoadels.dart';
 import 'package:schoolpenintern/Providers/models/StudentProfilemodels.dart';
-import 'package:schoolpenintern/Providers/models/TeacherProfilemodels.dart';
 import 'package:schoolpenintern/Screens/Chat/ChatMessage/ChatMessageScreen.dart';
 import 'package:schoolpenintern/Screens/Chat/ChatMessage/bloc/chat_message_bloc.dart';
 import 'package:schoolpenintern/Screens/Chat/models/userSearchmodel.dart';
 import 'package:http/http.dart' as http;
 import 'package:schoolpenintern/data/Network/config.dart';
 import 'package:schoolpenintern/data/model/StudentProfileModel.dart';
-import '../../../../Theme/Colors/appcolors.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
+import '../../../../Theme/Colors/appcolors.dart';
+import '../../../../utiles/LoadImage.dart';
 import '../../../../utiles/TimeToDays.dart';
+import '../../models/TeacherDataMoadel.dart';
 
 // ignore: must_be_immutable
 class TeacherTab extends StatefulWidget {
@@ -28,10 +29,10 @@ class TeacherTab extends StatefulWidget {
   });
 
   @override
-  State<TeacherTab> createState() => TeacherTabState();
+  State<TeacherTab> createState() => _TeacherTabState();
 }
 
-class TeacherTabState extends State<TeacherTab> {
+class _TeacherTabState extends State<TeacherTab> {
   late String image;
   late String userid;
   late String name;
@@ -39,14 +40,14 @@ class TeacherTabState extends State<TeacherTab> {
 
   List chatsData = [];
   String lastmessage = "";
-  String date = "";
+  String? date = "";
 
   getLastMessage(id) async {
     UserProfileProvider userdata =
         Provider.of<UserProfileProvider>(context, listen: false);
 
     var url = Uri.parse(
-        'http://192.168.33.88:7000/last_message/${userdata.userid}/${id}');
+        '${Config.chatserverUrl}/last_message/${userdata.userid}/${id}');
     print(url);
     var req = http.MultipartRequest('GET', url);
     var res = await req.send();
@@ -54,9 +55,11 @@ class TeacherTabState extends State<TeacherTab> {
     print('============================================');
     if (res.statusCode >= 200 && res.statusCode < 300) {
       Map resBodymap = jsonDecode(resBody);
+      print(resBodymap);
       setState(() {
         lastmessage = resBodymap['message'];
-        date = resBodymap['created_at'];
+
+        date = changeTimeToDayOrHour(resBodymap['created_at']);
       });
     } else {
       print(res.reasonPhrase);
@@ -78,16 +81,16 @@ class TeacherTabState extends State<TeacherTab> {
       roal = "student";
       getLastMessage(userid);
     } else if (widget.chatuserId!['role'] == 'teacher') {
-      TeacherProfileModel userData =
-          TeacherProfileModel.fromJson(widget.chatuserId);
+      TeacherProfileDataModel userData =
+          TeacherProfileDataModel.fromJson(widget.chatuserId);
       image = userData.userImage!;
-      userid = userData.profile!.useridnamePassword!.useridName!;
+      userid = userData.profile!.useridnamePassword!.useridName.toString();
       name = userData.username!;
       roal = "teacher";
       getLastMessage(userid);
     } else if (widget.chatuserId!['role'] == 'parent') {
-      ParentProfileModel userData =
-          ParentProfileModel.fromJson(widget.chatuserId);
+      ParentProfileDataModel userData =
+          ParentProfileDataModel.fromJson(widget.chatuserId);
       image = userData.parentImage!;
       userid = userData.parentUseridname!;
       name = userData.parentName!;
@@ -96,6 +99,11 @@ class TeacherTabState extends State<TeacherTab> {
     }
     setState(() {});
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -116,7 +124,7 @@ class TeacherTabState extends State<TeacherTab> {
                   chatuserid: userid,
                   name: name,
                   roal: roal,
-                  image: image,
+                  image: loadImage(image, roal),
                   chatusernameid: userid,
                 ),
               );
@@ -135,7 +143,7 @@ class TeacherTabState extends State<TeacherTab> {
             borderRadius: BorderRadius.circular(50),
           ),
           child: Image.network(
-            "${Config.hostUrl}/static/${image}",
+            loadImage(image, roal),
             height: 50,
             width: 50,
             fit: BoxFit.cover,
@@ -147,7 +155,7 @@ class TeacherTabState extends State<TeacherTab> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            userid ?? "",
+            name ?? "",
             style: TextStyle(
                 color: AppColors.graymdm,
                 fontWeight: FontWeight.bold,
@@ -166,7 +174,7 @@ class TeacherTabState extends State<TeacherTab> {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Text(
-            changeTimeToDayOrHour(date) ?? '',
+            date.toString(),
             style: TextStyle(fontSize: 12, color: AppColors.greenlignt),
           ),
           const SizedBox(height: 5),

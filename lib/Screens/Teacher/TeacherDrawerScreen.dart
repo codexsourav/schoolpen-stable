@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:schoolpenintern/Screens/Teacher/Theme/Colors/appcolors.dart';
 
 import '../../Providers/UserProfileProvider.dart';
 import '../StartupDashBord/views/admin_user.dart';
@@ -32,43 +33,73 @@ class _TeacherDrawerScreenState extends State<TeacherDrawerScreen> {
         child: Row(
           children: [
             Container(
-              width: w * 0.2,
-              height: h * 0.2,
-              decoration: BoxDecoration(
+              width: 55,
+              height: 55,
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.white,
-                image: DecorationImage(
-                    image: AssetImage(widget.profileImg), fit: BoxFit.fill),
               ),
+              child: Image.asset("assets/about.png"),
             ),
             const SizedBox(
               width: 10,
             ),
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.schoolName,
-                    maxLines: 3,
+            // .............................................// Add School Button Sections ^^^>>>>>>>>>>>>>>>>>>>>>
+
+            GestureDetector(
+              onTap: () {},
+              child: Container(
+                width: 150,
+                height: 45,
+                decoration: ShapeDecoration(
+                  color: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                ),
+                child: const Center(
+                  child: Text(
+                    'Add school',
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: w * 0.05,
+                      color: AppColors.parentPrimary,
+                      fontSize: 16,
+                      fontFamily: 'Poppins',
+                      fontWeight: FontWeight.w700,
                     ),
                   ),
-                  Text(
-                    widget.location,
-                    maxLines: 1,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: w * 0.04,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+            )
+
+            //   Flexible(
+            //     child: Column(
+            //       crossAxisAlignment: CrossAxisAlignment.start,
+            //       mainAxisAlignment: MainAxisAlignment.center,
+            //       children: [
+            //         Text(
+            //           "Hrllo",
+            //           maxLines: 2,
+            //           overflow: TextOverflow.ellipsis,
+            //           style: TextStyle(
+            //             color: Colors.white,
+            //             fontWeight: FontWeight.bold,
+            //             fontSize: w * 0.05,
+            //           ),
+            //         ),
+            //         Text(
+            //           widget.location,
+            //           overflow: TextOverflow.ellipsis,
+            //           maxLines: 1,
+            //           style: TextStyle(
+            //             color: Colors.white,
+            //             fontSize: w * 0.04,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            //
           ],
         ),
       ),

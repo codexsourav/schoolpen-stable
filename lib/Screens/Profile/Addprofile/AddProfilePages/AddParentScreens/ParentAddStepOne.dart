@@ -47,10 +47,10 @@ class ParentAddStepOneState extends State<ParentAddStepOne> {
   TextEditingController phone = TextEditingController();
   TextEditingController email = TextEditingController();
   TextEditingController about = TextEditingController();
-    TextEditingController city = TextEditingController();
-      TextEditingController state = TextEditingController();
-        TextEditingController area = TextEditingController();
-          TextEditingController pincode = TextEditingController();
+  TextEditingController city = TextEditingController();
+  TextEditingController state = TextEditingController();
+  TextEditingController area = TextEditingController();
+  TextEditingController pincode = TextEditingController();
 
 // Moreverify and add In State
   checkvalidate() {
@@ -59,7 +59,7 @@ class ParentAddStepOneState extends State<ParentAddStepOne> {
     dataProvider.setData(
       gtefullname: name.text,
       gteemail: email.text,
-      getarea:area.text ,
+      getarea: area.text,
       getcity: city.text,
       getpincode: pincode.text,
       getstate: state.text,
@@ -188,23 +188,23 @@ class ParentAddStepOneState extends State<ParentAddStepOne> {
                       hintText: "asbvda@jjajdsa.com",
                     ),
                     MultiTextInputField(
-                            color: Color(0xffEEFCF3),
-                        isNumbered: false,
-                        controller1: area,
-                        controller2: city,
-                        hinttext1: "Area",
-                        hinttext2: "City",
-                        title: "Address line 1",
-                      ),
-                        MultiTextInputField(
-                          color: Color(0xffEEFCF3),
-                          isNumbered: true,
-                        controller1: state,
-                        controller2: pincode,
-                        hinttext1: "State",
-                        hinttext2: "Pincode",
-                        title: "Address line 2",
-                      ),
+                      color: Color(0xffEEFCF3),
+                      isNumbered: false,
+                      controller1: area,
+                      controller2: city,
+                      hinttext1: "Area",
+                      hinttext2: "City",
+                      title: "Address line 1",
+                    ),
+                    MultiTextInputField(
+                      color: Color(0xffEEFCF3),
+                      isNumbered: true,
+                      controller1: state,
+                      controller2: pincode,
+                      hinttext1: "State",
+                      hinttext2: "Pincode",
+                      title: "Address line 2",
+                    ),
                     InputBox(
                       padding: inputPadding,
                       cursorColor: themeDark,
@@ -213,6 +213,7 @@ class ParentAddStepOneState extends State<ParentAddStepOne> {
                       hintText: "Write Here..",
                       maxLines: 5,
                       borderRadius: 20,
+                      controller: about,
                     ),
                   ],
                 ),

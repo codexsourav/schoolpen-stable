@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 Map viewProfileTabs = {
   "student": {
-    'bgcolor': const Color.fromARGB(255, 255, 251, 230),
-    "darkcolor": const Color.fromARGB(255, 254, 214, 0),
+    'bgcolor': const Color(0XffEBE4F5),
+    "darkcolor": const Color(0Xff9163D7),
     "tabs": [
       {
         "tabtitle": "Profile",

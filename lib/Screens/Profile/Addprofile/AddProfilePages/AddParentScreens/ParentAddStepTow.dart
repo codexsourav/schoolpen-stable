@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:schoolpenintern/Screens/Parents/parent_home.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../../Helper/snackBarHelper.dart';
@@ -68,7 +69,7 @@ class ParentAddStepTowState extends State<ParentAddStepTow> {
           final SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setString("roal", "parent");
           prefs.setString("user_id", res['parent_useridname']);
-          Get.offAll(ViewParentProfile());
+          Get.offAll(ParentHomePage());
         } catch (e) {
           Fluttertoast.showToast(msg: "A Error occured!!");
           print(e);

@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:provider/provider.dart';
+import 'package:schoolpenintern/utiles/LoadImage.dart';
 
 import '../../../Providers/UserProfileProvider.dart';
+import '../../Profile/ViewUserProfile.dart';
 import '../../StartupDashBord/views/admin_user.dart';
 
 class DrawerScreen extends StatefulWidget {
-  const DrawerScreen(
-      {super.key,
-      required this.schoolName,
-      required this.location,
-      required this.profileImg});
-  final String schoolName;
+  const DrawerScreen({
+    super.key,
+    required this.location,
+  });
+
   final String location;
-  final String profileImg;
+
   @override
   State<DrawerScreen> createState() => _DrawerScreenState();
 }
@@ -27,50 +28,78 @@ class _DrawerScreenState extends State<DrawerScreen> {
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return Column(children: [
-      Container(
-        height: h * 0.1,
-        margin: const EdgeInsets.only(top: 50, left: 20),
-        child: Row(
-          children: [
-            Container(
-              width: w * 0.2,
-              height: h * 0.2,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
-                image: DecorationImage(
-                    image: AssetImage(widget.profileImg), fit: BoxFit.fill),
-              ),
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    widget.schoolName,
-                    maxLines: 3,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: w * 0.05,
-                    ),
+      GestureDetector(
+        onTap: () {
+          Get.to(ViewUserProfile(
+              userid: Provider.of<UserProfileProvider>(context, listen: false)
+                  .parentprofile!
+                  .parentUseridname
+                  .toString(),
+              role: 'parent'));
+        },
+        child: Container(
+          height: h * 0.1,
+          margin: const EdgeInsets.only(top: 50, left: 20),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
                   ),
-                  Text(
-                    widget.location,
-                    maxLines: 1,
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: w * 0.04,
-                    ),
+                  child: Image.network(
+                    loadImage(
+                        Provider.of<UserProfileProvider>(context, listen: false)
+                            .parentprofile!
+                            .parentImage
+                            .toString(),
+                        "parent"),
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
                   ),
-                ],
+                ),
               ),
-            ),
-          ],
+              const SizedBox(
+                width: 10,
+              ),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      Provider.of<UserProfileProvider>(context, listen: false)
+                          .parentprofile!
+                          .parentName
+                          .toString(),
+                      maxLines: 3,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: w * 0.05,
+                      ),
+                    ),
+                    Text(
+                      Provider.of<UserProfileProvider>(context, listen: false)
+                          .parentprofile!
+                          .parentUseridname
+                          .toString(),
+                      maxLines: 1,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: w * 0.04,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
       ListTileTheme(

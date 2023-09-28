@@ -99,6 +99,9 @@ class AddTeacherStepTowState extends State<AddTeacherStpeTow> {
                       inputfillColor: secColor,
                       title: "School Key",
                       hintText: "Key/code",
+                      validate: (e) {
+                        return null;
+                      },
                     ),
                     InputBox(
                       controller: subject,

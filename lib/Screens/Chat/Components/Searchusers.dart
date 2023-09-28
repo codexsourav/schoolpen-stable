@@ -5,13 +5,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
-import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
 import 'package:schoolpenintern/Screens/Chat/ChatMessage/ChatMessageScreen.dart';
 import 'package:schoolpenintern/Screens/Chat/ChatMessage/bloc/chat_message_bloc.dart';
-import 'package:schoolpenintern/Screens/Chat/Components/ChatuserListBox.dart';
 import 'package:schoolpenintern/data/Network/config.dart';
-import '../../../Helper/snackBarHelper.dart';
+import 'package:schoolpenintern/utiles/LoadImage.dart';
 import '../../../Theme/Colors/appcolors.dart';
 import '../models/userSearchmodel.dart';
 
@@ -44,6 +41,7 @@ class _SearchUsersState extends State<SearchUsers> {
         setState(() {
           dataMoadel = UserSearchMoadel.fromJson(jsonDecode(data.body));
         });
+        print(data.body);
       } catch (e) {
         var snackBar = const SnackBar(content: Text('No User Found!!'));
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
@@ -91,7 +89,7 @@ class _SearchUsersState extends State<SearchUsers> {
       ),
       body: dataMoadel == null
           ? const Center(
-              child: Text("Search Teachers or Students"),
+              child: Text("Search Teachers Students or Parents"),
             )
           : Center(
               child: Column(
@@ -120,7 +118,8 @@ class _SearchUsersState extends State<SearchUsers> {
                             ClipRRect(
                               borderRadius: BorderRadius.circular(50),
                               child: Image.network(
-                                "${Config.hostUrl}/static/${dataMoadel!.userImage}",
+                                loadImage(
+                                    dataMoadel!.userImage, dataMoadel!.role),
                                 width: 60,
                                 height: 60,
                                 fit: BoxFit.cover,
@@ -134,7 +133,7 @@ class _SearchUsersState extends State<SearchUsers> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    dataMoadel!.username!.toUpperCase(),
+                                    dataMoadel!.userId!.toUpperCase(),
                                     style: const TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -162,7 +161,8 @@ class _SearchUsersState extends State<SearchUsers> {
                                     myid: widget.myid,
                                     chatuserid: dataMoadel!.userId,
                                     name: dataMoadel!.username,
-                                    image: dataMoadel!.userImage,
+                                    image: loadImage(dataMoadel!.userImage,
+                                        dataMoadel!.role),
                                     chatusernameid: dataMoadel!.userId,
                                     roal: dataMoadel!.role,
                                   ),

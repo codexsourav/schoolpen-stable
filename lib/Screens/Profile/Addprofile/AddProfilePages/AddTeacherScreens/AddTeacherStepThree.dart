@@ -4,19 +4,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:schoolpenintern/Providers/models/TeacherProfilemodels.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../Providers/UserProfileProvider.dart';
 import '../../../../../data/Network/api_network.dart';
+import '../../../../Chat/models/TeacherDataMoadel.dart';
 import '../../../../StartupDashBord/views/login_screen.dart';
-import '../../../../Student/home_screen.dart';
 import '../../../../Teacher/home.dart';
 import '../../Components/AddUsersAppBar.dart';
 import '../../Components/StepsBar.dart';
 import '../../Validator/Validate.dart';
-
 import '../../../../../Helper/snackBarHelper.dart';
-
 import '../../Components/InputBox.dart';
 import '../../Components/SubmitButton.dart';
 import '../../../../../Providers/AddUsersProvider.dart';
@@ -59,11 +56,12 @@ class AddTeacherStepThreeState extends State<AddTeacherStepThree> {
       if (addDataresponse != false) {
         print(addDataresponse);
         // ignore: use_build_context_synchronously
-        TeacherProfileModel teacherprofile =
-            TeacherProfileModel.fromJson(addDataresponse);
+        TeacherProfileDataModel teacherprofile =
+            TeacherProfileDataModel.fromJson(addDataresponse);
         try {
           var res = await ApiNetwork.sendGetRequest(
-            'get_teacher/' + addDataresponse['_id'],
+            'get_teacher_profile/' +
+                teacherprofile.profile!.useridnamePassword.toString(),
           );
           Provider.of<UserProfileProvider>(context, listen: false)
               .setTeacherData(res);
