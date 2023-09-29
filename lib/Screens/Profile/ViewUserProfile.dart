@@ -247,20 +247,24 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                                     myid: Provider.of<UserProfileProvider>(
                                             context,
                                             listen: false)
-                                        .profileData!
-                                        .userId
+                                        .teacherdata!
+                                        .profile!
+                                        .useridnamePassword!
+                                        .useridName
                                         .toString(),
                                     image: Provider.of<UserProfileProvider>(
                                             context,
                                             listen: false)
-                                        .profileData!
+                                        .teacherdata!
                                         .userImage
                                         .toString(),
                                     myuserid: Provider.of<UserProfileProvider>(
                                             context,
                                             listen: false)
-                                        .profileData!
-                                        .userId
+                                        .teacherdata!
+                                        .profile!
+                                        .useridnamePassword!
+                                        .useridName
                                         .toString()));
                               },
                               std: teacherData.languages.toString(),
@@ -405,8 +409,7 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                                   backgroundColor: viewProfileTabs["parent"]
                                       ['bgcolor'],
                                   emailText: parentData.parentEmail.toString(),
-                                  phoneText: "+91 " +
-                                      parentData.parentPhone.toString(),
+                                  phoneText: "+91 ${parentData.parentPhone}",
                                   locationAddress:
                                       "${parentData.parentStreetAddress},${parentData.parentCity},${parentData.parentState},${parentData.parentPostalCode}"
                                           .toString(),
@@ -477,9 +480,8 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                                     emailText: studentData
                                         .personalInfo!.contact!.email
                                         .toString(),
-                                    phoneText: "+91 " +
-                                        studentData.personalInfo!.contact!.phone
-                                            .toString(),
+                                    phoneText:
+                                        "+91 ${studentData.personalInfo!.contact!.phone}",
                                     locationAddress:
                                         "${studentData.personalInfo!.contact!.address!.street},${studentData.personalInfo!.contact!.address!.city},${studentData.personalInfo!.contact!.address!.state},${studentData.personalInfo!.contact!.address!.pincode}"
                                             .toString(),
@@ -549,9 +551,8 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                                     emailText: teacherData
                                         .profile!.contact!.email
                                         .toString(),
-                                    phoneText: teacherData
-                                        .profile!.contact!.phone
-                                        .toString(),
+                                    phoneText:
+                                        "+91 ${teacherData.profile!.contact!.phone}",
                                     isedit: true,
                                     locationAddress:
                                         "${teacherData.profile!.contact!.address!.street}, ${teacherData.profile!.contact!.address!.city},${teacherData.profile!.contact!.address!.state},${teacherData.profile!.contact!.address!.postalCode}"

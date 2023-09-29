@@ -6,10 +6,7 @@ import 'package:schoolpenintern/Screens/Profile/Addprofile/AddProfilePages/AddPa
 import 'package:schoolpenintern/Screens/Profile/Addprofile/AddProfilePages/AddStudentScreens/AddStudentStepOne.dart';
 import 'package:schoolpenintern/Screens/Profile/Addprofile/AddProfilePages/AddTeacherScreens/AddTeacherStepOne.dart';
 import 'package:schoolpenintern/Screens/StartupDashBord/views/admin_user.dart';
-import 'package:schoolpenintern/Screens/Student/home_screen.dart';
-
 import '../Screens/SplashScreen.dart';
-import '../Screens/home_screen.dart';
 import '../bloc/main_bloc/main_bloc.dart';
 import 'routes_names.dart';
 

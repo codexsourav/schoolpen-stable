@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../../Providers/UserProfileProvider.dart';
-import '../../../../../data/Network/api_network.dart';
 import '../../../../Chat/models/TeacherDataMoadel.dart';
 import '../../../../StartupDashBord/views/login_screen.dart';
 import '../../../../Teacher/home.dart';
@@ -27,7 +26,7 @@ class AddTeacherStepThree extends StatefulWidget {
 
 class AddTeacherStepThreeState extends State<AddTeacherStepThree> {
   Color themeDark = const Color(0xFFC45162);
-  Color secColor = Color.fromARGB(255, 250, 242, 243);
+  Color secColor = const Color.fromARGB(255, 250, 242, 243);
 
   final GlobalKey<FormState> _formvaliduid = GlobalKey<FormState>();
   final GlobalKey<FormState> _formvalidpass = GlobalKey<FormState>();
@@ -54,21 +53,24 @@ class AddTeacherStepThreeState extends State<AddTeacherStepThree> {
     } else {
       var addDataresponse = await dataProvider.addTeacherDatabase(context);
       if (addDataresponse != false) {
+        print("response -=========================");
         print(addDataresponse);
         // ignore: use_build_context_synchronously
-        TeacherProfileDataModel teacherprofile =
-            TeacherProfileDataModel.fromJson(addDataresponse);
         try {
-          var res = await ApiNetwork.sendGetRequest(
-            'get_teacher_profile/' +
-                teacherprofile.profile!.useridnamePassword.toString(),
-          );
+          TeacherProfileDataModel teacherprofile =
+              TeacherProfileDataModel.fromJson(addDataresponse);
+
+          // ignore: use_build_context_synchronously
           Provider.of<UserProfileProvider>(context, listen: false)
-              .setTeacherData(res);
+              .setTeacherData(addDataresponse);
           final SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setString("roal", "teacher");
-          prefs.setString("user_id", res['_id']);
-          Get.offAll(TeacherHomePage());
+          prefs.setString(
+              "user_id",
+              teacherprofile.profile!.useridnamePassword!.useridName
+                  .toString());
+
+          Get.offAll(const TeacherHomePage());
         } catch (e) {
           print(e);
           Get.offAll(Login());

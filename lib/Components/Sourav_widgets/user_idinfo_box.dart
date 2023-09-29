@@ -92,7 +92,7 @@ class UserIdInfo extends StatelessWidget {
                     hoverColor: Colors.transparent,
                     splashColor: Colors.transparent,
                     onPressed: onEditClick,
-                    icon: const Icon(Icons.edit_rounded)),
+                    icon: const Icon(Icons.edit_square)),
               )),
         ],
       ),

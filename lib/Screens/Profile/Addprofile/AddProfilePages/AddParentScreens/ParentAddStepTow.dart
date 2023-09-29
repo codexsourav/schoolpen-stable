@@ -54,15 +54,16 @@ class ParentAddStepTowState extends State<ParentAddStepTow> {
         color: Colors.red,
       );
     } else {
-      var resd = await dataProvider.addParentDatabase(context);
-
       //print("==============>" + resd);
+
+      var resd = await dataProvider.addParentDatabase(context);
 
       if (resd != false) {
         try {
           var res = await ApiNetwork.sendGetRequest(
-            'get_parent_data/' + resd,
+            'parent_data/' + resd,
           );
+
           // ignore: use_build_context_synchronously
           Provider.of<UserProfileProvider>(context, listen: false)
               .setParentData(res);

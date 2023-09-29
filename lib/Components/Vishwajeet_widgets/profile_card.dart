@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get_utils/get_utils.dart';
 import 'package:provider/provider.dart';
 
 import '../../Providers/UserProfileProvider.dart';
@@ -51,7 +52,7 @@ class _ProfileCardState extends State<ProfileCard> {
   void setImage(id) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['jpg', 'pdf', 'doc'],
+      allowedExtensions: ['jpg', 'jpeg', 'png'],
     );
 
     if (result != null) {
@@ -163,14 +164,25 @@ class _ProfileCardState extends State<ProfileCard> {
                       SizedBox(
                         width: w * 0.4,
                         child: Text(
-                          widget.userName,
+                          widget.userName.capitalize!,
                           style: TextStyle(fontSize: w * 0.06),
                         ),
                       ),
+                      widget.role == "parent"
+                          ? SizedBox()
+                          : SizedBox(
+                              width: w * 0.25,
+                              child: Text(
+                                widget.isStudent
+                                    ? 'Class ${widget.std}'
+                                    : widget.std.capitalize!,
+                                style: TextStyle(fontSize: w * 0.04),
+                              ),
+                            ),
                       SizedBox(
                         width: w * 0.25,
                         child: Text(
-                          widget.isStudent ? 'Class ${widget.std}' : widget.std,
+                          widget.role!.capitalize!,
                           style: TextStyle(fontSize: w * 0.04),
                         ),
                       ),
@@ -229,6 +241,7 @@ class _ProfileCardState extends State<ProfileCard> {
                     color: widget.backGroundColor,
                     darkcolor: widget.buttonColor,
                     role: widget.role,
+                    others: widget.std,
                     id: Provider.of<UserProfileProvider>(context, listen: false)
                         .userid,
                     oldusername: widget.userName,

@@ -25,7 +25,7 @@ class SearchUserProfile extends StatefulWidget {
   String? userid;
   String? role;
 
-  SearchUserProfile({super.key, this.userid, this.role});
+  SearchUserProfile({super.key, this.userid, this.role = 'student'});
 
   @override
   State<SearchUserProfile> createState() => SearchUserProfileState();
@@ -98,7 +98,11 @@ class SearchUserProfileState extends State<SearchUserProfile> {
             child: loading
                 ? const Center(
                     child: SizedBox(
-                        height: 120, child: CircularProgressIndicator()),
+                        height: 120,
+                        child: Center(
+                            child: CircularProgressIndicator(
+                          color: Colors.black,
+                        ))),
                   )
                 : searchdata == null
                     ? const SizedBox(
@@ -113,9 +117,10 @@ class SearchUserProfileState extends State<SearchUserProfile> {
                             padding: const EdgeInsets.all(20.0),
                             child: ProfileCard(
                               backGroundColor: viewProfileTabs[widget.role]
-                                  ['bgcolor'],
+                                      ['bgcolor'] ??
+                                  Colors.blue,
                               userName: searchdata!.username.toString(),
-                              std: searchdata!.role.toString(),
+                              std: "",
                               borderRedius:
                                   searchdata!.role == 'parent' ? 100 : 20,
                               borderwidth: searchdata!.role == 'parent' ? 2 : 0,
@@ -124,6 +129,7 @@ class SearchUserProfileState extends State<SearchUserProfile> {
                               buttonColor: viewProfileTabs[widget.role]
                                   ['darkcolor'],
                               isStudent: false,
+                              role: searchdata!.role,
                               onMessage: () {
                                 Get.to(
                                   BlocProvider(

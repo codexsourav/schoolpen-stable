@@ -6,6 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
 
 import 'package:provider/provider.dart';
+import 'package:schoolpenintern/Screens/Parents/parent_home.dart';
 import 'package:schoolpenintern/Screens/Profile/ViewProfile/view_parent_profile.dart';
 import 'package:schoolpenintern/Screens/Student/home_screen.dart';
 import 'package:schoolpenintern/data/Network/api_network.dart';
@@ -77,10 +78,11 @@ class _SplashScreenState extends State<SplashScreen> {
         } else if (state is ParentScreenState) {
           try {
             var res = await ApiNetwork.sendGetRequest(
-                'get_parent_data/' + state.username);
+                'parent_data/' + state.username);
+            print(res);
             Provider.of<UserProfileProvider>(context, listen: false)
                 .setParentData(res);
-            Get.offAll(ViewParentProfile());
+            Get.offAll(ParentHomePage());
           } catch (e) {
             print(e);
             Fluttertoast.showToast(msg: "Check Your Internet");

@@ -27,7 +27,8 @@ class AppSetUpBloc extends Bloc<InitialEvents, InitialStates> {
             ),
           );
         } else if (prefs.getString("roal") == "parent") {
-          emit(ParentScreenState());
+          emit(ParentScreenState(
+              roal: "parent", username: prefs.get('user_id')));
         } else {
           emit(HomeScreenState());
         }

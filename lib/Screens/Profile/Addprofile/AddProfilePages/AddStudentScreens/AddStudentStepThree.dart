@@ -59,13 +59,16 @@ class AddStudentStepThreeState extends State<AddStudentStepThree> {
 
         try {
           var res = await ApiNetwork.sendGetRequest(
+            // ignore: prefer_interpolation_to_compose_strings
             'get_user/' + addDataresponse['user_id'],
           );
+          // ignore: use_build_context_synchronously
           Provider.of<UserProfileProvider>(context, listen: false)
               .setProfileData(res);
           final SharedPreferences prefs = await SharedPreferences.getInstance();
           prefs.setString("roal", "student");
           prefs.setString("user_id", res['user_id']);
+          // ignore: prefer_const_constructors
           Get.offAll(StudentHomeScreen(
             role: "student",
           ));

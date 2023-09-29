@@ -70,7 +70,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               iconSize: 25,
               type: BottomNavigationBarType.fixed,
               selectedItemColor: AppColors.primary,
-              unselectedIconTheme: IconThemeData(
+              unselectedIconTheme: const IconThemeData(
                 color: Color.fromARGB(83, 145, 99, 215),
               ),
               showUnselectedLabels: false,

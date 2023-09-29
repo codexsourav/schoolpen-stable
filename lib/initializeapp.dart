@@ -51,9 +51,9 @@ class MyApp extends StatelessWidget {
       theme: appTheme,
       themeMode: ThemeMode.light,
       onGenerateRoute: AppRoutes.generateRoute,
-      // initialRoute: RoutesName.splash,
+      initialRoute: RoutesName.splash,
 
-      initialRoute: RoutesName.startPage,
+      // initialRoute: RoutesName.startPage,
       // home: RoleScreen(),
     );
   }

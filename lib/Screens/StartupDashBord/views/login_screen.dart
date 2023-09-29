@@ -129,6 +129,14 @@ class _LoginState extends State<Login> {
                           Provider.of<UserProfileProvider>(context,
                                   listen: false)
                               .setTeacherData(resd);
+                          final SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          prefs.setString("roal", "teacher");
+                          prefs.setString(
+                              "user_id",
+                              resd!['profile']['useridname_password']
+                                  ['userid_name']);
+
                           Get.offAll(const TeacherHomePage());
                           print(resd);
                           setState(() {
@@ -151,7 +159,10 @@ class _LoginState extends State<Login> {
                           Provider.of<UserProfileProvider>(context,
                                   listen: false)
                               .setParentData(res);
-
+                          final SharedPreferences prefs =
+                              await SharedPreferences.getInstance();
+                          prefs.setString("roal", "teacher");
+                          prefs.setString("user_id", res!['parent_useridname']);
                           Get.offAll(const ParentHomePage());
                           print(res);
                           setState(() {

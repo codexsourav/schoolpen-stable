@@ -1,7 +1,6 @@
 from flask import Flask, jsonify, request, make_response, send_file, render_template
 from pymongo import  errors
 import re
-from gridfs import GridFS
 from bson import ObjectId, Binary
 from flask_pymongo import PyMongo
 from werkzeug .security import generate_password_hash,check_password_hash
@@ -99,52 +98,7 @@ def check_for_user(phone, user_id):
     
     return [phone_exists, useridname_exists]
 
-# Teacher Profile 
-def update_teacher_by_useridname(user_id, user_data):
-
-    hashed_password = generate_password_hash(user_data['profile']['useridname_password']['password'])
-
-    mongo_t.db.teacher_profile.update_one(
-        {'profile.useridname_password.userid_name': user_id},
-        {'$set': {
-            'username': user_data['username'],
-            'languages': user_data['languages'],
-            'user_image': user_data['user_image'],
-
-            'profile': {
-                'status': {
-                    'user_designation': user_data['profile']['status']['user_designation'],
-                    'user_description': user_data['profile']['status']['user_description']
-                },
-                'about': user_data['profile']['about'],
-                'useridname_password': {
-                    'userid_name': user_data['profile']['useridname_password']['userid_name'],
-                    'password': hashed_password
-                },
-                'contact': {
-                    'phone': user_data['profile']['contact']['phone'],
-                    'email': user_data['profile']['contact']['email'],
-                    'address': {
-                        'house_no': user_data['profile']['contact']['address']['house_no'],
-                        'street': user_data['profile']['contact']['address']['street'],
-                        'postal_code': user_data['profile']['contact']['address']['postal_code'],
-                        'city': user_data['profile']['contact']['address']['city'],
-                        'state': user_data['profile']['contact']['address']['state']
-                    }
-                }
-            }
-        }}
-    )
-
-
-
-
-
-
-
-
-
-
+# Student Profile 
 # functions to support API's
 def is_student_user_id_unique(user_id):
     user = get_student(user_id)
@@ -467,13 +421,14 @@ def update_student_profile(user_id):
         _id = user_data['_id']
         username = request.form.get('username', user_data['username'])
         password = request.form.get('password')
-        # if not validate_password(password):
-        #     return jsonify({"error": "Not valid Password."}), 400
+
         if password:
+            if not validate_password(password):
+                return jsonify({"error": "Not valid Password."}), 400
             hashed_password = generate_password_hash(password)
         else: 
             hashed_password = user_data['password']
-        user_id_name = request.form.get('user_id')
+        user_id = request.form.get('user_id')
 
         user_class = request.form.get('user_class', user_data['user_class'])
         status_title = request.form.get('status_title', user_data['status_title'])
@@ -486,14 +441,13 @@ def update_student_profile(user_id):
         state = request.form.get('state', user_data['personal_info']['contact']['address']['state'])
         pincode = request.form.get('pincode', user_data['personal_info']['contact']['address']['pincode'])
 
-        print(phone)
+
         address = {
             "street":street,
             "city":city,
             'state':state,
             "pincode":pincode
         }
-        print(address)
         # Optional: Handle the user image update
         if 'user_image' in request.files:
                 image = request.files['user_image']
@@ -505,23 +459,26 @@ def update_student_profile(user_id):
                     return jsonify({"error": "Invalid image or file format."}), 400
         else:
              user_image = user_data['user_image']
-        result = check_for_user(phone,user_id_name)
+        result = check_for_user(phone,user_id)
         phone_exists = result[0]
         useridname = result[1]
 
         if phone != user_data['personal_info']['contact']['phone'] and phone_exists:
-                return jsonify({"error": "This phone number is already exist"}), 400
-        elif phone != user_data['personal_info']['contact']['phone']:
+            return jsonify({"error": "This phone number is already exist"}), 400
+        elif phone != user_data['personal_info']['contact']['phone'] and request.form.get('phone'):
             phone = request.form.get('phone')
         else:
             phone = user_data['personal_info']['contact']['phone']
-        if useridname:
+
+        if useridname != user_data['user_id'] and useridname:
             return jsonify({"error": "This useridname is already exist"}), 400
+        elif useridname != user_data['user_id'] and request.form.get('user_id'):
+            useridname = request.form.get('user_id')
         else:
             useridname = user_data['user_id']
 
         user_data ={
-                'user_id':user_id,
+                'user_id':useridname,
                 'username': username,
                 'password':hashed_password,
                 'user_class': user_class,
@@ -538,12 +495,10 @@ def update_student_profile(user_id):
                 },
         
             }
-        
-        
         result = mongo_s.db.student_profile.update_one({"_id":_id},
                                                     {"$set": user_data})
         if result.modified_count == 0:
-            return jsonify({"error": "No Changes Found"}), 400
+            return jsonify({"error": "No changes found"}), 400
         updated_entity = mongo_s.db.student_profile.find_one({"_id": _id})
         return jsonify(updated_entity), 200
     except errors.PyMongoError as e:
@@ -554,7 +509,6 @@ def update_student_profile(user_id):
 # Management Profile 
 
 # functions to support API's
-
 def get_management(user_id):
     user = mongo_m.db.management_profile.find_one({'user_id': user_id})
     if user:
@@ -696,16 +650,22 @@ def update_management_profile(user_id):
         phone_exists = result[0]
         useridname = result[1]
 
-        if phone_exists:
-                return jsonify({"error": "This phone number is already exist"}), 400
+        if phone != user_data['personal_info']['contact']['phone'] and phone_exists:
+            return jsonify({"error": "This phone number is already exist"}), 400
+        elif phone != user_data['personal_info']['contact']['phone'] and request.form.get('phone'):
+            phone = request.form.get('phone')
         else:
             phone = user_data['personal_info']['contact']['phone']
-        if useridname:
+
+        if useridname != user_data['user_id'] and useridname:
             return jsonify({"error": "This useridname is already exist"}), 400
+        elif useridname != user_data['user_id'] and request.form.get('user_id'):
+            useridname = request.form.get('user_id')
         else:
             useridname = user_data['user_id']
+
         user_data ={
-                'user_id':user_id,
+                'user_id':useridname,
                 'username': username,
                 'password':hashed_password,
                 'user_image': user_image,
@@ -748,7 +708,6 @@ def fetch_parent_data(search_value):
             'parent_about': parent_data['personal_info']['parent_about'],
             'parent_phone': parent_data['personal_info']['contact']['parent_phone'],
             'parent_email': parent_data['personal_info']['contact']['parent_email'],
-            "parent_country":parent_data['personal_info']['contact']['parent_address']['parent_country'],
             "parent_state":parent_data['personal_info']['contact']['parent_address']['parent_state'],
             "parent_StreetAddress":parent_data['personal_info']['contact']['parent_address']['parent_StreetAddress'],
             "parent_city":parent_data['personal_info']['contact']['parent_address']['parent_city'],
@@ -854,9 +813,6 @@ def update_parent_profile(useridname):
     # Example: Update the 'parent_name', 'parent_designation', and 'parent_description'
     user_id = request.form.get('parent_useridname')
     parent_data['parent_name'] = request.form.get('parent_name', parent_data['parent_name'])
-    parent_data['parent_age'] = request.form.get('parent_age', parent_data['parent_age'])
-    parent_data["parent_DOB"]=request.form.get('parent_DOB',parent_data["parent_DOB"])
-    parent_data['parent_gender'] = request.form.get('parent_gender', parent_data['parent_gender'])
     parent_data['personal_info']['parent_about'] = request.form.get('parent_about', parent_data['personal_info']['parent_about'])
     phone = request.form.get('parent_phone')
     parent_data['personal_info']['contact']['parent_email'] = request.form.get('parent_email', parent_data['personal_info']['contact']['parent_email'])
@@ -869,20 +825,19 @@ def update_parent_profile(useridname):
     parent_separate_data['parent_StreetAddress'] = request.form.get('parent_StreetAddress', parent_separate_data['parent_StreetAddress'])
     parent_separate_data['parent_PostalCode'] = request.form.get('parent_PostalCode', parent_separate_data['parent_PostalCode'])
 
-    if user_id or phone:
-        result = check_for_user(phone,user_id)
-        phone_exists = result[0]
-        useridname = result[1]
+    result = check_for_user(phone,user_id)
+    phone_exists = result[0]
+    useridname = result[1]
 
-    if phone_exists:
-            return jsonify({"error": "This phone number is already exist"}), 400
-    # else:
-    #     parent_data['personal_info']['contact']['parent_phone'] = request.form.get('parent_phone', parent_data['personal_info']['contact']['parent_phone'])
+    if phone != parent_data['personal_info']['contact']['parent_phone'] and phone_exists:
+        return jsonify({"error": "This phone number is already exist"}), 400
+    elif phone != parent_data['personal_info']['contact']['parent_phone'] and request.form.get('parent_phone'):
+        parent_data['personal_info']['contact']['parent_phone'] = request.form.get('parent_phone')
 
-    if useridname:
+    if useridname != parent_data['parent_useridname'] and useridname:
         return jsonify({"error": "This useridname is already exist"}), 400
-    # else:
-    #     parent_data['parent_useridname'] = request.form.get('parent_useridname', parent_data['parent_useridname'])
+    elif useridname != parent_data['parent_useridname'] and request.form.get('parent_useridname'):
+        parent_data['parent_useridname'] = request.form.get('parent_useridname')
 
     
     if 'user_image' in request.files:
@@ -921,7 +876,7 @@ def get_parent(parent_useridname):
 def update_parent(parent_data):
     # Update the parent document in the MongoDB collection based on its ObjectId
     parent_profile_collection.update_one(
-        {'_id': ObjectId(parent_data['_id'])},
+        {'_id': parent_data['_id']},
         {'$set': parent_data}
     )
 
@@ -974,19 +929,12 @@ def get_teacher(user_id):
     user = mongo_t.db.teacher_profile.find_one({'_id': ObjectId(user_id)})
     return user if user else None
 
-def get_teacher_by_useridname(userid_name):
-    user = mongo_t.db.teacher_profile.find_one({'profile.useridname_password.userid_name': userid_name})
-    if user:
-        user['_id'] = str(user['_id'])
-        return user
-    return None
+def update_teacher(user_id, user_data):
 
-def update_teacher(user_data):
-
-    hashed_password = generate_password_hash(user_data['profile']['useridname_password']['password'])
+    # hashed_password = generate_password_hash(user_data['profile']['useridname_password']['password'])
 
     mongo_t.db.teacher_profile.update_one(
-        {'_id': ObjectId(user_data['_id'])},
+        {'_id': ObjectId(user_id)},
         {'$set': {
             'username': user_data['username'],
             'languages': user_data['languages'],
@@ -1000,7 +948,7 @@ def update_teacher(user_data):
                 'about': user_data['profile']['about'],
                 'useridname_password': {
                     'userid_name': user_data['profile']['useridname_password']['userid_name'],
-                    'password': hashed_password
+                    'password': user_data['profile']['useridname_password']['password']
                 },
                 'contact': {
                     'phone': user_data['profile']['contact']['phone'],
@@ -1016,9 +964,6 @@ def update_teacher(user_data):
             }
         }}
     )
-
-
-
 
 @app.route('/get_teacher_profile/<string:user_id>', methods = ['GET'])
 def get_teacher_profile(user_id):
@@ -1181,14 +1126,13 @@ def create_teacher_profile():
             return jsonify({"error": "This useridname is already exist"}), 400
     else:
         newdata = create_teacher(user_data)
-        print("NEW:", newdata)
         newdata['_id'] = str(newdata['_id'])
         return jsonify(newdata)
 
 
 @app.route('/update_teacher/<string:user_id>', methods=['PUT', 'POST'])
 def update_user_profile(user_id):
-    user_data = get_teacher_by_useridname(user_id)
+    user_data = mongo_t.db.teacher_profile.find_one({'profile.useridname_password.userid_name': user_id})
 
     if not user_data:
         return jsonify({"error": "User not found"}), 400
@@ -1196,31 +1140,39 @@ def update_user_profile(user_id):
     username = request.form.get('username', user_data['username'])
     languages = request.form.get('languages', user_data['languages'])
 
+    phone = request.form.get('phone')
+    user_id = request.form.get('userid_name')
     user_designation = request.form.get('user_designation', user_data['profile']['status']['user_designation'])
     user_description = request.form.get('user_description', user_data['profile']['status']['user_description'])
 
     about = request.form.get('user_about', user_data['profile']['about'])
-
-    # userid_name = request.form.get('userid_name',  user_data['profile']['useridname_password']['userid_name'])
-    userid_name = request.form.get('userid_name')
-    if userid_name == '' or not userid_name:
-        userid_name = user_data['profile']['useridname_password']['userid_name']
-    else:
-        if check_for_user(phone=None, user_id=userid_name)[1]:
-            return jsonify({'error': 'Useridname already exists!!'})
         
-    if request.form.get('password'):
-        password = generate_password_hash(request.form.get('password'))
-    else:
-        password = user_data['profile']['useridname_password']['password']
+    password = request.form.get('password')
 
-    # phone = request.form.get('phone', user_data['profile']['contact']['phone'])
-    phone = request.form.get('phone')
-    if phone == '' or not phone:
-        phone = user_data['profile']['contact']['phone']
+    if password:
+        if not validate_password(password):
+            return jsonify({"error": "Not valid Password."}), 400
+        hashed_password = generate_password_hash(password)
+    else: 
+        hashed_password = user_data['profile']['useridname_password']['password']
+
+    result = check_for_user(phone,user_id)
+    phone_exists = result[0]
+    useridname = result[1]
+
+    if phone != user_data['profile']['contact']['phone'] and phone_exists:
+        return jsonify({"error": "This phone number is already exist"}), 400
+    elif phone != user_data['profile']['contact']['phone'] and request.form.get('phone'):
+        phone = request.form.get('phone')
     else:
-        if check_for_user(phone=phone, user_id=None)[0]:
-            return jsonify({'error': 'Phone already exists!!'})
+        phone = user_data['profile']['contact']['phone']
+
+    if useridname != user_data['profile']['useridname_password']['userid_name'] and useridname:
+        return jsonify({"error": "This useridname is already exist"}), 400
+    elif useridname != user_data['profile']['useridname_password']['userid_name'] and request.form.get('userid_name'):
+        useridname = request.form.get('userid_name')
+    else:
+        useridname = user_data['profile']['useridname_password']['userid_name']   
 
     email = request.form.get('email', user_data['profile']['contact']['email'])
     house_no = request.form.get('house_no', user_data['profile']['contact']['address']['house_no'])
@@ -1255,8 +1207,8 @@ def update_user_profile(user_id):
     }
 
     useridname_password = {
-        'userid_name': userid_name,
-        'password': password
+        'userid_name': useridname,
+        'password': hashed_password
     }
 
     address = {
@@ -1287,12 +1239,14 @@ def update_user_profile(user_id):
 
         'profile': profile
     }
-    update_teacher_by_useridname(user_id, new_user_data)
+    user_object_id = user_data['_id']
+    update_teacher(user_object_id, new_user_data)
+    
 
-    updated_user = get_teacher_by_useridname(userid_name)
-    updated_user['_id'] = str(updated_user['_id'])
+    updated_user = mongo_t.db.teacher_profile.find_one({'profile.useridname_password.userid_name': user_id})
+    # updated_user['_id'] = str(updated_user['_id'])
 
-    return jsonify(updated_user)
+    return jsonify({"message":"User Updated"})
 
 
 

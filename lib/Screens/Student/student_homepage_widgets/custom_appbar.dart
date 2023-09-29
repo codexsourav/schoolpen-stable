@@ -21,6 +21,12 @@ class StudentCustomAppbarWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         height: 180,
+        decoration: const BoxDecoration(
+            gradient: LinearGradient(colors: [
+          Color.fromRGBO(248, 96, 5, 1),
+          Color.fromRGBO(248, 209, 5, 1),
+          // Color.fromRGBO(242, 154, 102, 0),
+        ], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
         child: Row(
           children: [
             GestureDetector(
@@ -39,10 +45,10 @@ class StudentCustomAppbarWidget extends StatelessWidget {
                 ),
               ),
             ),
-            Spacer(),
+            const Spacer(),
             Row(
               children: [
-                AppbarIconWidget(),
+                const AppbarIconWidget(),
                 Padding(
                   padding: const EdgeInsets.only(right: 12.0),
                   child: ClipRRect(
@@ -66,6 +72,7 @@ class StudentCustomAppbarWidget extends StatelessWidget {
                         // "https://images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D&w=1000&q=80",
                         // "https://m.media-amazon.com/images/I/41EvGpCFECL._AC_UF1000,1000_QL80_.jpg",
                         width: 36,
+                        height: 36,
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -74,13 +81,7 @@ class StudentCustomAppbarWidget extends StatelessWidget {
               ],
             )
           ],
-        ),
-        decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [
-          Color.fromRGBO(248, 96, 5, 1),
-          Color.fromRGBO(248, 209, 5, 1),
-          // Color.fromRGBO(242, 154, 102, 0),
-        ], begin: Alignment.topCenter, end: Alignment.bottomCenter)));
+        ));
   }
 }
 
@@ -92,16 +93,28 @@ class TeacherCustomAppbar extends StatelessWidget {
     UserProfileProvider userData = Provider.of<UserProfileProvider>(context);
     return Container(
         height: 200,
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+              image: AssetImage(
+                "assets/images/parent_bg.png",
+              ),
+              fit: BoxFit.fitWidth),
+        ),
         child: Row(
           children: [
-            Spacer(),
+            const Spacer(),
             Row(
               children: [
-                AppbarIconWidget(),
+                const AppbarIconWidget(),
                 Padding(
                   padding: const EdgeInsets.only(right: 12.0),
                   child: GestureDetector(
-                    onTap: () {},
+                    onTap: () {
+                      Get.to(ViewUserProfile(
+                        role: 'teacher',
+                        userid: userData.userid.toString(),
+                      ));
+                    },
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(50),
                       child: Image.network(
@@ -121,14 +134,6 @@ class TeacherCustomAppbar extends StatelessWidget {
               ],
             )
           ],
-        ),
-        decoration: BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage(
-                "assets/images/parent_bg.png",
-              ),
-              fit: BoxFit.fitWidth),
         ));
-    ;
   }
 }

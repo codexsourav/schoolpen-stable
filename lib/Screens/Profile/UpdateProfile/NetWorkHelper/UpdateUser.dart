@@ -2,10 +2,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:schoolpenintern/Providers/UserProfileProvider.dart';
 import 'package:schoolpenintern/Screens/Profile/Addprofile/Components/InputBox.dart';
 import 'package:schoolpenintern/Screens/Profile/Addprofile/Components/SubmitButton.dart';
 import 'package:schoolpenintern/Screens/Profile/Addprofile/Validator/Validate.dart';
+import 'package:schoolpenintern/Screens/StartupDashBord/views/admin_user.dart';
 import 'package:schoolpenintern/data/Network/config.dart';
 
 class UpdateUser {
@@ -14,7 +18,10 @@ class UpdateUser {
       required String userId,
       String? file}) async {
     var url = Uri.parse('${Config.hostUrl}$route/$userId');
+
+    print("========UPDATE DATA==========");
     print(url);
+    print(data);
     var req = http.MultipartRequest('PUT', url);
     req.fields.addAll(data);
     if (file != null) {
@@ -32,7 +39,7 @@ class UpdateUser {
         if (resdata.containsKey('error')) {
           return {"error": resdata['error']};
         } else {
-          return {"error": "Error!! Data Not Updated"};
+          return {"error": "Error!! Maybe Server Error"};
         }
       }
     } catch (e) {
@@ -56,11 +63,11 @@ class UpdateUser {
 
 // Update Form Box User ID
   showUpdateProfileNameAlertDialog(BuildContext context,
-      {color, darkcolor, id, oldusername, role}) {
+      {color, darkcolor, id, oldusername, role, others = ''}) {
     getEndPoient(role);
 
     TextEditingController _username = TextEditingController(text: oldusername);
-    TextEditingController _other = TextEditingController();
+    TextEditingController _other = TextEditingController(text: others);
 
     GlobalKey<FormState> _form = GlobalKey();
 
@@ -75,7 +82,7 @@ class UpdateUser {
       };
 
       Map<String, String> parentData = {
-        "username": _username.text,
+        "parent_name": _username.text,
       };
 
 // Get Usrr Date A pass here===============
@@ -182,17 +189,17 @@ class UpdateUser {
     Future updateUsername() async {
       Map<String, String> studentData = {
         "user_id": _username.text,
-        _pass.text.isNotEmpty ? "password" : _pass.text: '',
+        "password": _pass.text,
       };
 
       Map<String, String> teacherData = {
         "userid_name": _username.text,
-        _pass.text.isNotEmpty ? "password" : _pass.text: '',
+        "password": _pass.text,
       };
 
       Map<String, String> parentData = {
-        "parent_useridname": _pass.text,
-        _pass.text.isNotEmpty ? "new_password" : _pass.text: '',
+        "parent_useridname": _username.text,
+        "new_password": _pass.text,
       };
 
 // Get Usrr Date A pass here===============
@@ -214,7 +221,10 @@ class UpdateUser {
         if (val.containsKey('error')) {
           Fluttertoast.showToast(msg: val['error']);
         } else {
-          Fluttertoast.showToast(msg: "Update Complete");
+          Fluttertoast.showToast(
+              msg: "Update Complete UserId Changed To ${_username.text}");
+          Provider.of<UserProfileProvider>(context, listen: false).userlogout();
+          Get.offAll(const RoleScreen());
         }
       });
     }
@@ -223,13 +233,18 @@ class UpdateUser {
     Widget okButton = Padding(
       padding: const EdgeInsets.all(18.0),
       child: SubmitButton(
-          color: darkcolor,
-          text: "Update Info",
-          onPressed: () {
-            if (_form.currentState!.validate()) {
+        color: darkcolor,
+        text: "Update Info",
+        onPressed: () {
+          if (_form.currentState!.validate()) {
+            if (_pass.text != _cpass.text) {
+              Fluttertoast.showToast(msg: "Password Not Matched!");
+            } else {
               updateUsername();
             }
-          }),
+          }
+        },
+      ),
     );
 
     // set up the AlertDialog
@@ -266,8 +281,7 @@ class UpdateUser {
                 cursorColor: darkcolor,
                 inputfillColor: color,
                 controller: _pass,
-                validate: (p) =>
-                    p!.isNotEmpty ? Validate.isPasswordValid(p) : null,
+                validate: (p) => Validate.isPasswordValid(p!),
               ),
               const SizedBox(height: 10),
               InputBox(
@@ -279,8 +293,7 @@ class UpdateUser {
                 cursorColor: darkcolor,
                 inputfillColor: color,
                 controller: _cpass,
-                validate: (p) =>
-                    p!.isNotEmpty ? Validate.isPasswordValid(p) : null,
+                validate: (p) => Validate.isPasswordValid(p!),
               ),
             ],
           ),
