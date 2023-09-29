@@ -31,8 +31,8 @@ class ProfileController extends GetxController {
           options: Options(
             contentType: Headers.jsonContentType,
           ));
+      print(response.data);
       if (response.statusCode == 200) {
-        print(response.data);
         print(signupModel.fromJson(response.data).message);
         print(signupModel.fromJson(response.data).userId);
         print(response.data);
@@ -79,6 +79,7 @@ class ProfileController extends GetxController {
         return null;
       }
     } on DioException catch (e) {
+      print(e.response);
       if (e.response!.data != null) {
         Fluttertoast.showToast(
             msg: signupModel.fromJson(e.response!.data).message ??

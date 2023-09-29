@@ -9,6 +9,19 @@ class Validate {
     }
   }
 
+  static username(e) {
+    if (int.tryParse(e ?? "") != null) {
+      return "Enter Some characters";
+    } else if (e!.length <= 5) {
+      return "Username Min 5 characters";
+    } else if (!RegExp(r'^[a-zA-Z_][a-zA-Z0-9_-]{5,20}$').hasMatch(
+      e.toString(),
+    )) {
+      return 'Invalid username. Must be 5-20 characters';
+    }
+    return null;
+  }
+
   static fldisValidEmail(String v, String fldname) {
     if (!RegExp(r'^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$').hasMatch(v)) {
       return 'Invalid Email ID';

@@ -15,6 +15,7 @@ class InputBox extends StatefulWidget {
   final EdgeInsets? padding;
   final double borderRadius;
   final int maxLines;
+  final contentPadding;
   bool secure;
   bool showeye;
   final int? maxlen;
@@ -35,6 +36,10 @@ class InputBox extends StatefulWidget {
     this.secure = false,
     this.showeye = false,
     this.maxlen,
+    this.contentPadding = const EdgeInsets.symmetric(
+      horizontal: 20,
+      vertical: 16,
+    ),
   });
 
   @override
@@ -79,10 +84,7 @@ class _InputBoxState extends State<InputBox> {
           obscureText: widget.secure,
           maxLength: widget.maxlen,
           decoration: InputDecoration(
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 16,
-            ),
+            contentPadding: widget.contentPadding,
             counterText: "",
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(widget.borderRadius),

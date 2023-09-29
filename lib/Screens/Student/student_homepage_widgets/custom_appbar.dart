@@ -87,9 +87,9 @@ class StudentCustomAppbarWidget extends StatelessWidget {
 class TeacherCustomAppbar extends StatelessWidget {
   final AdvancedDrawerController controller;
   const TeacherCustomAppbar({super.key, required this.controller});
-
   @override
   Widget build(BuildContext context) {
+    UserProfileProvider userData = Provider.of<UserProfileProvider>(context);
     return Container(
         height: 200,
         child: Row(
@@ -100,18 +100,21 @@ class TeacherCustomAppbar extends StatelessWidget {
                 AppbarIconWidget(),
                 Padding(
                   padding: const EdgeInsets.only(right: 12.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(50),
-                    child: Image.network(
-                      loadImage(
-                          Provider.of<UserProfileProvider>(context)
-                              .teacherdata!
-                              .userImage
-                              .toString(),
-                          "teacher"),
-                      width: 36,
-                      height: 36,
-                      fit: BoxFit.cover,
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(50),
+                      child: Image.network(
+                        loadImage(
+                            Provider.of<UserProfileProvider>(context)
+                                .teacherdata!
+                                .userImage
+                                .toString(),
+                            "teacher"),
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 )

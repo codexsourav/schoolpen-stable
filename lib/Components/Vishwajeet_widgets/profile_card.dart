@@ -1,6 +1,15 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+import 'dart:typed_data';
 
-class ProfileCard extends StatelessWidget {
+import 'package:file_picker/file_picker.dart';
+import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:provider/provider.dart';
+
+import '../../Providers/UserProfileProvider.dart';
+import '../../Screens/Profile/UpdateProfile/NetWorkHelper/UpdateUser.dart';
+
+class ProfileCard extends StatefulWidget {
   const ProfileCard({
     super.key,
     required this.backGroundColor,
@@ -14,7 +23,9 @@ class ProfileCard extends StatelessWidget {
     this.edit = false,
     this.borderRedius = 20,
     this.borderwidth = 0,
+    this.role,
   });
+  final String? role;
   final Color backGroundColor;
   final Color buttonColor;
   final String userName;
@@ -29,7 +40,51 @@ class ProfileCard extends StatelessWidget {
   final bool edit;
 
   @override
+  State<ProfileCard> createState() => _ProfileCardState();
+}
+
+class _ProfileCardState extends State<ProfileCard> {
+  UpdateUser updateData = UpdateUser();
+  File? updateimage;
+  bool loading = false;
+
+  void setImage(id) async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'pdf', 'doc'],
+    );
+
+    if (result != null) {
+      File file = File(result.files.single.path.toString());
+
+      setState(() {
+        updateimage = file;
+      });
+
+      setState(() {
+        loading = true;
+      });
+      updateData
+          .updateUserData(updateData.getEndPoient(widget.role),
+              data: {}, userId: id, file: file.path)
+          .then((val) {
+        setState(() {
+          loading = false;
+        });
+        if (val.containsKey("error")) {
+          Fluttertoast.showToast(msg: val['error']);
+        } else {
+          Fluttertoast.showToast(msg: 'Profile Picture Updated!');
+        }
+      });
+    } else {
+      // User canceled the picker
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    UserProfileProvider userData = Provider.of<UserProfileProvider>(context);
     double w = MediaQuery.of(context).size.width;
     double h = MediaQuery.of(context).size.height;
     return Stack(
@@ -37,7 +92,7 @@ class ProfileCard extends StatelessWidget {
         Container(
           width: double.infinity,
           decoration: BoxDecoration(
-            color: backGroundColor,
+            color: widget.backGroundColor,
             borderRadius: const BorderRadius.all(
               Radius.circular(20),
             ),
@@ -48,18 +103,56 @@ class ProfileCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  Container(
-                    height: (h < 700) ? h * 0.25 : h * 0.2,
-                    width: w * 0.4,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(borderRedius),
-                      color: Colors.grey,
-                      border: borderwidth == 0
-                          ? null
-                          : Border.all(width: borderwidth, color: buttonColor),
-                      image: DecorationImage(
-                          image: NetworkImage(image), fit: BoxFit.cover),
-                    ),
+                  GestureDetector(
+                    onTap: () => widget.edit ? setImage(userData.userid) : null,
+                    child: updateimage != null
+                        ? ClipRRect(
+                            borderRadius:
+                                BorderRadius.circular(widget.borderRedius),
+                            child: Image.file(
+                              updateimage!,
+                              height: (h < 700) ? h * 0.25 : h * 0.2,
+                              width: w * 0.4,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Stack(
+                            children: [
+                              Container(
+                                height: (h < 700) ? h * 0.25 : h * 0.2,
+                                width: w * 0.4,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(
+                                      widget.borderRedius),
+                                  color: Colors.grey,
+                                  border: widget.borderwidth == 0
+                                      ? null
+                                      : Border.all(
+                                          width: widget.borderwidth,
+                                          color: widget.buttonColor),
+                                  image: DecorationImage(
+                                      image: NetworkImage(widget.image),
+                                      fit: BoxFit.cover),
+                                ),
+                              ),
+                              loading
+                                  ? SizedBox(
+                                      height: (h < 700) ? h * 0.25 : h * 0.2,
+                                      width: w * 0.4,
+                                      child: Center(
+                                        child: Align(
+                                          alignment: Alignment.center,
+                                          child: Center(
+                                            child: CircularProgressIndicator(
+                                              color: widget.buttonColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                                  : const SizedBox(),
+                            ],
+                          ),
                   ),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -70,14 +163,14 @@ class ProfileCard extends StatelessWidget {
                       SizedBox(
                         width: w * 0.4,
                         child: Text(
-                          userName,
+                          widget.userName,
                           style: TextStyle(fontSize: w * 0.06),
                         ),
                       ),
                       SizedBox(
                         width: w * 0.25,
                         child: Text(
-                          isStudent ? 'Class $std' : std,
+                          widget.isStudent ? 'Class ${widget.std}' : widget.std,
                           style: TextStyle(fontSize: w * 0.04),
                         ),
                       ),
@@ -89,12 +182,13 @@ class ProfileCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             GestureDetector(
-                              onTap: onCall,
+                              onTap: widget.onCall,
                               child: Container(
                                 height: h * 0.1,
                                 width: w * 0.1,
                                 decoration: BoxDecoration(
-                                    shape: BoxShape.circle, color: buttonColor),
+                                    shape: BoxShape.circle,
+                                    color: widget.buttonColor),
                                 child: const Icon(
                                   Icons.call,
                                   color: Colors.white,
@@ -102,16 +196,17 @@ class ProfileCard extends StatelessWidget {
                               ),
                             ),
                             GestureDetector(
-                              onTap: onMessage,
+                              onTap: widget.onMessage,
                               child: Container(
                                 height: h * 0.1,
                                 width: w * 0.1,
                                 decoration: BoxDecoration(
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: buttonColor)),
+                                    border:
+                                        Border.all(color: widget.buttonColor)),
                                 child: Icon(
                                   Icons.messenger,
-                                  color: buttonColor,
+                                  color: widget.buttonColor,
                                 ),
                               ),
                             )
@@ -125,19 +220,30 @@ class ProfileCard extends StatelessWidget {
             ],
           ),
         ),
-        edit
+        widget.edit
             ? Align(
                 alignment: Alignment.topRight,
-                child: Padding(
-                  padding: EdgeInsets.only(top: 10, right: 20),
-                  child: Icon(
-                    Icons.edit_note,
-                    color: Colors.grey,
-                    size: 30,
+                child: GestureDetector(
+                  onTap: () => UpdateUser().showUpdateProfileNameAlertDialog(
+                    context,
+                    color: widget.backGroundColor,
+                    darkcolor: widget.buttonColor,
+                    role: widget.role,
+                    id: Provider.of<UserProfileProvider>(context, listen: false)
+                        .userid,
+                    oldusername: widget.userName,
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.only(top: 10, right: 20),
+                    child: Icon(
+                      Icons.edit_note,
+                      color: Colors.grey,
+                      size: 30,
+                    ),
                   ),
                 ),
               )
-            : SizedBox(),
+            : const SizedBox(),
       ],
     );
   }

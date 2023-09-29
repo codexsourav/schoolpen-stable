@@ -9,6 +9,8 @@ class UserConatctBox extends StatelessWidget {
   final String emailText;
   final String locationAddress;
   final String headingText;
+  final String? role;
+
   final bool isedit;
   final void Function()? onEditClick;
 
@@ -21,6 +23,7 @@ class UserConatctBox extends StatelessWidget {
     this.headingText = "Contact",
     required this.onEditClick,
     this.isedit = false,
+    this.role,
   });
 
   @override

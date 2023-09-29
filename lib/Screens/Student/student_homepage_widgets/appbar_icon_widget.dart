@@ -32,12 +32,24 @@ class AppbarIconWidget extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              Get.to(() => NewChatHome(
-                    myid: userData.dbid.toString(),
-                    myuserid: userData.userid.toString(),
-                    image: userData.profileData!.userImage.toString(),
-                    role: "student",
-                  ));
+              if (userData.roal == 'student') {
+                Get.to(() => NewChatHome(
+                      myid: userData.userid.toString(),
+                      myuserid: userData.userid.toString(),
+                      image: userData.profileData!.userImage.toString(),
+                      role: "student",
+                    ));
+              } else if (userData.roal == "teacher") {
+                Get.to(() => NewChatHome(
+                      myid: userData.teacherdata!.profile!.useridnamePassword
+                          .toString(),
+                      myuserid: userData
+                          .teacherdata!.profile!.useridnamePassword
+                          .toString(),
+                      image: userData.teacherdata!.userImage.toString(),
+                      role: "teacher",
+                    ));
+              }
             },
             child: SvgPicture.asset(
               "assets/images/student_section_images/homepage_images/header_images/chat_icon.svg",

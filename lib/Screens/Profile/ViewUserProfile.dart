@@ -20,6 +20,7 @@ import 'package:schoolpenintern/Screens/Chat/ChatHome/NewChatHome.dart';
 
 import 'package:schoolpenintern/Screens/Parents/Components/Abhil_widgets/status_card.dart';
 import 'package:schoolpenintern/Screens/Parents/Components/Vishwajeet_widgets/search_widget.dart';
+import 'package:schoolpenintern/Screens/Profile/UpdateProfile/NetWorkHelper/UpdateUser.dart';
 
 import 'package:schoolpenintern/Screens/Profile/ViewProfile/Constents.dart';
 import 'package:schoolpenintern/Screens/SearchUser/SearchUsers.dart';
@@ -31,7 +32,6 @@ import 'package:schoolpenintern/utiles/LoadImage.dart';
 import '../../Components/Abhil_widgets/tile_widget.dart';
 import '../../Components/Sourav_widgets/user_contact_info_box.dart';
 import '../../Providers/models/TeacherProfilemodels.dart';
-import '../Chat/Components/Searchusers.dart';
 
 class ViewUserProfile extends StatefulWidget {
   final String userid;
@@ -44,7 +44,7 @@ class ViewUserProfile extends StatefulWidget {
 }
 
 class _ViewUserProfileState extends State<ViewUserProfile> {
-  TextEditingController _controller = TextEditingController();
+  final TextEditingController _controller = TextEditingController();
   late StudentProfileModel studentData;
   late ParentProfileDataModel parentData;
   late TeacherProfileModel teacherData;
@@ -75,12 +75,11 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
       return false;
     }
 
-    print(url);
     var req = http.MultipartRequest('GET', url);
 
     var res = await req.send();
     final resBody = await res.stream.bytesToString();
-    print(resBody);
+
     if (res.statusCode >= 200 && res.statusCode < 300) {
       if (widget.role == 'student') {
         studentData = StudentProfileModel.fromJson(jsonDecode(resBody));
@@ -134,10 +133,12 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                         onTap: () {},
                         onEditingComplete: () {
                           if (_controller.text.isNotEmpty) {
-                            Get.to(SearchUserProfile(
-                              userid: _controller.text,
-                              role: widget.role,
-                            ));
+                            Get.to(
+                              SearchUserProfile(
+                                userid: _controller.text,
+                                role: widget.role,
+                              ),
+                            );
                           }
                         },
                       ),
@@ -146,6 +147,7 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                           if (widget.role == 'student') {
                             return ProfileCard(
                               edit: true,
+                              role: "student",
                               backGroundColor: viewProfileTabs['student']
                                   ['bgcolor'],
                               userName: studentData.username.toString(),
@@ -186,6 +188,7 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                             );
                           } else if (widget.role == "parent") {
                             return ProfileCard(
+                              role: "parent",
                               edit: true,
                               backGroundColor: viewProfileTabs["parent"]
                                   ['bgcolor'],
@@ -204,17 +207,16 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                                 Get.to(NewChatHome(
                                     role: 'parent',
                                     myid: Provider.of<UserProfileProvider>(
-                                            context,
-                                            listen: false)
+                                      context,
+                                      listen: false,
+                                    )
                                         .parentprofile!
                                         .parentUseridname
                                         .toString(),
                                     image: Provider.of<UserProfileProvider>(
-                                            context,
-                                            listen: false)
-                                        .parentprofile!
-                                        .parentImage
-                                        .toString(),
+                                      context,
+                                      listen: false,
+                                    ).parentprofile!.parentImage.toString(),
                                     myuserid: Provider.of<UserProfileProvider>(
                                             context,
                                             listen: false)
@@ -226,6 +228,7 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                             );
                           } else if (widget.role == 'teacher') {
                             return ProfileCard(
+                              role: "teacher",
                               edit: true,
                               backGroundColor: viewProfileTabs["teacher"]
                                   ['bgcolor'],
@@ -287,11 +290,12 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                           ],
                         ),
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       Builder(
                         builder: (context) {
                           if (widget.role == "student") {
                             return StatusCard(
+                              role: "student",
                               headline: studentData.statusTitle.toString(),
                               description:
                                   studentData.statusDescription.toString(),
@@ -300,6 +304,7 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                             );
                           } else if (widget.role == 'teacher') {
                             return StatusCard(
+                              role: 'teacher',
                               headline: teacherData
                                   .profile!.status!.userDesignation
                                   .toString(),
@@ -323,15 +328,26 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                             return Column(
                               children: [
                                 AboutCard(
+                                  role: "student",
                                   bgcolor: viewProfileTabs[widget.role]
                                       ['bgcolor'],
                                   description: studentData.personalInfo!.about
                                       .toString(),
                                   isedit: true,
                                 ),
-                                SizedBox(height: 20),
+                                const SizedBox(height: 20),
                                 UserIdInfo(
-                                  onEditClick: () {},
+                                  onEditClick: () {
+                                    UpdateUser().showUpdateNameAlertDialog(
+                                        context,
+                                        role: "student",
+                                        oldusername: studentData.userId,
+                                        color: viewProfileTabs["student"]
+                                            ['bgcolor'],
+                                        id: studentData.userId,
+                                        darkcolor: viewProfileTabs["student"]
+                                            ['darkcolor']);
+                                  },
                                   userIdText: studentData.userId.toString(),
                                   backgroundColor: viewProfileTabs["student"]
                                       ['bgcolor'],
@@ -342,23 +358,50 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                             return Column(
                               children: [
                                 AboutCard(
+                                  role: 'parent',
                                   isedit: true,
                                   bgcolor: viewProfileTabs["parent"]['bgcolor'],
                                   description:
                                       parentData.parentAbout.toString(),
                                 ),
-                                SizedBox(height: 20),
+                                const SizedBox(height: 20),
                                 UserIdInfo(
-                                  onEditClick: () {},
+                                  onEditClick: () {
+                                    UpdateUser().showUpdateNameAlertDialog(
+                                      context,
+                                      color: viewProfileTabs["parent"]
+                                          ['bgcolor'],
+                                      darkcolor: viewProfileTabs["parent"]
+                                          ['darkcolor'],
+                                      id: parentData.parentUseridname,
+                                      oldusername: parentData.parentUseridname,
+                                      role: "parent",
+                                    );
+                                  },
                                   userIdText:
                                       parentData.parentUseridname.toString(),
                                   backgroundColor: viewProfileTabs["parent"]
                                       ['bgcolor'],
                                 ),
-                                SizedBox(height: 20),
+                                const SizedBox(height: 20),
                                 UserConatctBox(
                                   isedit: true,
-                                  onEditClick: () {},
+                                  onEditClick: () {
+                                    UpdateUser().showAddressAlertDialog(context,
+                                        role: "parent",
+                                        emailid: parentData.parentEmail,
+                                        phone: parentData.parentPhone,
+                                        city: parentData.parentCity,
+                                        pincode: parentData.parentPostalCode,
+                                        state: parentData.parentState,
+                                        street: parentData.parentStreetAddress,
+                                        id: parentData.parentUseridname,
+                                        color: viewProfileTabs["parent"]
+                                            ['bgcolor'],
+                                        darkcolor: viewProfileTabs["parent"]
+                                            ['darkcolor']);
+                                  },
+                                  role: 'parent',
                                   backgroundColor: viewProfileTabs["parent"]
                                       ['bgcolor'],
                                   emailText: parentData.parentEmail.toString(),
@@ -368,7 +411,7 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                                       "${parentData.parentStreetAddress},${parentData.parentCity},${parentData.parentState},${parentData.parentPostalCode}"
                                           .toString(),
                                 ),
-                                SizedBox(height: 20),
+                                const SizedBox(height: 20),
                                 UserParentsBox(
                                     title: "Kids Details",
                                     bgcolor: viewProfileTabs["parent"]
@@ -376,13 +419,14 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                                     darkcolor: viewProfileTabs["parent"]
                                         ['darkcolor'],
                                     data: []),
-                                SizedBox(height: 20),
+                                const SizedBox(height: 20),
                               ],
                             );
                           } else if (widget.role == "teacher") {
                             return Column(
                               children: [
                                 AboutCard(
+                                  role: "teacher",
                                   isedit: true,
                                   bgcolor: viewProfileTabs["teacher"]
                                       ['bgcolor'],
@@ -392,7 +436,7 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                               ],
                             );
                           } else {
-                            return SizedBox();
+                            return const SizedBox();
                           }
                         },
                       ),
@@ -404,8 +448,30 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                               return Column(
                                 children: [
                                   UserConatctBox(
+                                    role: 'student',
                                     isedit: true,
-                                    onEditClick: () {},
+                                    onEditClick: () {
+                                      UpdateUser().showAddressAlertDialog(
+                                          context,
+                                          role: "student",
+                                          emailid: studentData
+                                              .personalInfo!.contact!.email,
+                                          phone: studentData
+                                              .personalInfo!.contact!.phone,
+                                          city: studentData.personalInfo!
+                                              .contact!.address!.city,
+                                          pincode: studentData.personalInfo!
+                                              .contact!.address!.pincode,
+                                          state: studentData.personalInfo!
+                                              .contact!.address!.state,
+                                          street: studentData.personalInfo!
+                                              .contact!.address!.street,
+                                          id: studentData.userId,
+                                          color: viewProfileTabs["student"]
+                                              ['bgcolor'],
+                                          darkcolor: viewProfileTabs["student"]
+                                              ['darkcolor']);
+                                    },
                                     backgroundColor: viewProfileTabs["student"]
                                         ['bgcolor'],
                                     emailText: studentData
@@ -418,30 +484,83 @@ class _ViewUserProfileState extends State<ViewUserProfile> {
                                         "${studentData.personalInfo!.contact!.address!.street},${studentData.personalInfo!.contact!.address!.city},${studentData.personalInfo!.contact!.address!.state},${studentData.personalInfo!.contact!.address!.pincode}"
                                             .toString(),
                                   ),
-                                  SizedBox(height: 20),
+                                  const SizedBox(height: 20),
                                   UserParentsBox(
                                       bgcolor: viewProfileTabs["student"]
                                           ['bgcolor'],
                                       darkcolor: viewProfileTabs["student"]
                                           ['darkcolor'],
                                       data: []),
-                                  SizedBox(height: 20),
+                                  const SizedBox(height: 20),
                                   inviteParents(),
                                 ],
                               );
                             } else if (widget.role == 'teacher') {
-                              return UserConatctBox(
-                                onEditClick: () {},
-                                backgroundColor: viewProfileTabs["teacher"]
-                                    ['bgcolor'],
-                                emailText: teacherData.profile!.contact!.email
-                                    .toString(),
-                                phoneText: teacherData.profile!.contact!.phone
-                                    .toString(),
-                                isedit: true,
+                              return Column(
+                                children: [
+                                  UserIdInfo(
+                                    userIdText: teacherData
+                                        .profile!.useridnamePassword!.useridName
+                                        .toString(),
+                                    onEditClick: () {
+                                      UpdateUser().showUpdateNameAlertDialog(
+                                          context,
+                                          role: "teacher",
+                                          oldusername: teacherData.profile!
+                                              .useridnamePassword!.useridName,
+                                          color: viewProfileTabs["teacher"]
+                                              ['bgcolor'],
+                                          id: teacherData.profile!
+                                              .useridnamePassword!.useridName,
+                                          darkcolor: viewProfileTabs["teacher"]
+                                              ['darkcolor']);
+                                    },
+                                    backgroundColor: viewProfileTabs["teacher"]
+                                        ['bgcolor'],
+                                  ),
+                                  const SizedBox(height: 20),
+                                  UserConatctBox(
+                                    onEditClick: () {
+                                      UpdateUser().showAddressAlertDialog(
+                                          context,
+                                          role: "teacher",
+                                          emailid: teacherData
+                                              .profile!.contact!.email,
+                                          phone: teacherData
+                                              .profile!.contact!.phone,
+                                          city: teacherData
+                                              .profile!.contact!.address!.city,
+                                          pincode: teacherData.profile!.contact!
+                                              .address!.postalCode,
+                                          state: teacherData
+                                              .profile!.contact!.address!.state,
+                                          street: teacherData.profile!.contact!
+                                              .address!.street,
+                                          id: teacherData.profile!
+                                              .useridnamePassword!.useridName,
+                                          color: viewProfileTabs["teacher"]
+                                              ['bgcolor'],
+                                          darkcolor: viewProfileTabs["teacher"]
+                                              ['darkcolor']);
+                                    },
+                                    role: 'teacher',
+                                    backgroundColor: viewProfileTabs["teacher"]
+                                        ['bgcolor'],
+                                    emailText: teacherData
+                                        .profile!.contact!.email
+                                        .toString(),
+                                    phoneText: teacherData
+                                        .profile!.contact!.phone
+                                        .toString(),
+                                    isedit: true,
+                                    locationAddress:
+                                        "${teacherData.profile!.contact!.address!.street}, ${teacherData.profile!.contact!.address!.city},${teacherData.profile!.contact!.address!.state},${teacherData.profile!.contact!.address!.postalCode}"
+                                            .toString(),
+                                  ),
+                                ],
                               );
                             } else {
-                              return SizedBox();
+                              return const SizedBox();
                             }
                           },
                         ),

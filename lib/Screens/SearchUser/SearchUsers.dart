@@ -152,6 +152,7 @@ class SearchUserProfileState extends State<SearchUserProfile> {
                               : Padding(
                                   padding: const EdgeInsets.all(20.0),
                                   child: StatusCard(
+                                    role: searchdata!.role.toString(),
                                     headline:
                                         searchdata!.statusTitle.toString(),
                                     description: searchdata!.statusDescription
@@ -163,6 +164,7 @@ class SearchUserProfileState extends State<SearchUserProfile> {
                           Padding(
                             padding: const EdgeInsets.all(20.0),
                             child: AboutCard(
+                              role: "",
                               description: searchdata!.about.toString(),
                               bgcolor: viewProfileTabs[widget.role]['bgcolor'],
                               isedit: false,

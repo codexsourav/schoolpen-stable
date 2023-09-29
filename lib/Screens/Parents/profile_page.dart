@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:schoolpenintern/Screens/Teacher/Theme/Colors/appcolors.dart';
 import 'Components/Abhil_widgets/about_card.dart';
@@ -84,6 +83,7 @@ class TeacherProfile extends StatelessWidget {
                           )),
                       const SizedBox(height: 20),
                       StatusCard(
+                          role: "",
                           headline: "Class Representative",
                           bgcolor: AppColors.teacherboxcolor,
                           description:
